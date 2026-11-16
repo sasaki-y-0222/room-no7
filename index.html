@@ -11,7 +11,7 @@
 :root{
   --ink:#231a12; --paper:#eadfc6; --gold:#c9a45c; --gold2:#8c6d33;
   --red:#a3261d; --blue:#1d3f73; --bg:#0b0705;
-  --lx:80vw; --ly:10vh; --shx:-8px; --shy:16px; --fire:0; --fx:50vw; --fy:50vh;
+  --lx:80vw; --ly:10vh; --shx:-8px; --shy:16px;
   --serif:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
   --hand:"Klee One","Shippori Mincho",serif;
   --child:"Zen Kurenaido","Klee One",sans-serif;
@@ -31,8 +31,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   background:radial-gradient(circle farthest-corner at var(--lx) var(--ly),transparent 22%,rgba(8,4,1,.34) 62%,rgba(3,1,0,.68) 100%)}
 #glow{position:absolute;inset:0;
   background:radial-gradient(circle at var(--lx) var(--ly),rgba(255,196,110,.30),rgba(255,160,70,.10) 26vmax,transparent 50vmax)}
-#light::after{content:"";position:absolute;inset:0;opacity:var(--fire);mix-blend-mode:screen;
-  background:radial-gradient(circle at var(--fx) var(--fy),rgba(255,130,40,.42),rgba(255,90,20,.12) 34vmax,transparent 60vmax)}
+#fireGlow{position:absolute;width:120vmax;height:120vmax;margin:-60vmax 0 0 -60vmax;opacity:0;
+  background:radial-gradient(circle,rgba(255,130,40,.34),rgba(255,90,20,.10) 28%,transparent 50%)}
+#burnC{position:absolute;z-index:4;pointer-events:none;display:none}
 #desk.shake{animation:shake .32s cubic-bezier(.3,.7,.3,1)}
 @keyframes shake{0%{transform:translate(0,0)}18%{transform:translate(0,7px)}40%{transform:translate(-2px,-3px)}65%{transform:translate(1px,2px)}100%{transform:none}}
 
@@ -342,33 +343,14 @@ body.playing #btnMenu{visibility:visible}
     <button class="sbtn rej" id="bRej" aria-label="差止"><span class="well"></span><span class="pad"></span><span class="tool"></span><span class="plate"><b>差止</b><i>REJECT</i></span></button>
     <button class="sbtn pass" id="bPass" aria-label="通過"><span class="well"></span><span class="pad"></span><span class="tool"></span><span class="plate"><b>通過</b><i>PASS</i></span></button>
   </footer>
-  <div id="light"><i id="glow"></i></div>
+  <canvas id="burnC"></canvas>
+  <div id="light"><i id="glow"></i><i id="fireGlow"></i></div>
   <canvas id="fx"></canvas>
 </div>
 <div id="screen"></div>
 <div id="menu"></div>
 <div id="chart"></div>
 <div id="oriBar">縦画面でのプレイを推奨します（横向きでは手紙の表示が狭くなります）</div>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <filter id="burn" x="-8%" y="-8%" width="116%" height="116%" color-interpolation-filters="sRGB">
-    <feTurbulence type="fractalNoise" baseFrequency="0.0105" numOctaves="4" seed="7" result="n"/>
-    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0" result="na"/>
-    <feComponentTransfer in="na" result="m1"><feFuncA id="bA" type="linear" slope="40" intercept="0"/></feComponentTransfer>
-    <feComponentTransfer in="na" result="m2"><feFuncA id="bB" type="linear" slope="40" intercept="0"/></feComponentTransfer>
-    <feComponentTransfer in="na" result="m3"><feFuncA id="bC" type="linear" slope="14" intercept="0"/></feComponentTransfer>
-    <feComposite in="SourceGraphic" in2="m1" operator="in" result="paper"/>
-    <feFlood flood-color="#0e0703" flood-opacity=".9" result="blk"/>
-    <feComposite in="blk" in2="paper" operator="in" result="blkP"/>
-    <feComposite in="blkP" in2="m3" operator="out" result="char"/>
-    <feFlood flood-color="#ff8a2a" result="org"/>
-    <feComposite in="org" in2="SourceAlpha" operator="in" result="orgS"/>
-    <feComposite in="orgS" in2="m2" operator="in" result="orgM"/>
-    <feComposite in="orgM" in2="m1" operator="out" result="edge"/>
-    <feGaussianBlur in="edge" stdDeviation="4" result="glow"/>
-    <feMerge><feMergeNode in="glow"/><feMergeNode in="paper"/><feMergeNode in="char"/><feMergeNode in="edge"/></feMerge>
-  </filter>
-</svg>
-
 <script>
 'use strict';
 /* ================= textures (code-generated) ================= */
@@ -848,23 +830,51 @@ function decide(kind){
 }
 $('#bPass').onclick=()=>decide('pass');$('#bRej').onclick=()=>decide('rej');
 
-/* ================= burn ================= */
-const bA=$('#bA'),bB=$('#bB'),bC=$('#bC'),flames=[];
+/* ================= burn (low-res threshold mask on a small canvas; holes show the live desk render) ================= */
+const flames=[],burnC=$('#burnC'),bx_=burnC.getContext('2d'),fireGlow=$('#fireGlow'),LITE=matchMedia('(pointer:coarse)').matches;
+const mkC=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c};
+let BURN=null;
+function setFire(v){FIRE.i=v;fireGlow.style.opacity=v.toFixed(3)}
 function burnLetter(el,done){
-  const g=GEN,r=el.getBoundingClientRect(),t0=performance.now(),D=1550;
-  el.style.filter='url(#burn)';el.style.pointerEvents='none';sBurn();
-  FIRE.x=r.left+r.width/2;FIRE.y=r.top+r.height/2;
-  R.setProperty('--fx',FIRE.x+'px');R.setProperty('--fy',FIRE.y+'px');
-  (function step(now){
-    if(g!==GEN){FIRE.i=0;R.setProperty('--fire',0);return}
-    const p=Math.min(1,(now-t0)/D),t=.16+p*p*.25+p*.5;
-    bA.setAttribute('intercept',-40*t);bB.setAttribute('intercept',-40*(t-.028));bC.setAttribute('intercept',-14*(t+.012));
-    FIRE.i=Math.sin(Math.min(1,p*1.12)*Math.PI)*(.85+Math.random()*.3);R.setProperty('--fire',FIRE.i.toFixed(3));
-    if(p<.95){const n=p<.12?4:11;for(let i=0;i<n;i++)flames.push({x:r.left+Math.random()*r.width,y:r.top+Math.random()*r.height,
-        vx:(Math.random()-.5)*70,vy:-(25+Math.random()*150),s:.35+Math.random()*.95,l:0,m:.5+Math.random()*1.3,w:Math.random()*6.28})}
-    if(p<1)requestAnimationFrame(step);
-    else{el.remove();FIRE.i=0;R.setProperty('--fire',0);later(done,260)}
-  })(t0);
+  const r0=el.getBoundingClientRect(),r={left:r0.left-3,top:r0.top-3,width:r0.width+6,height:r0.height+6},q=LITE?3:2,nw=Math.max(8,Math.round(r.width/q)),nh=Math.max(8,Math.round(r.height/q));
+  const n=new Float32Array(nw*nh),gs=[];let seedv=(Math.random()*1e9)|0;
+  const rnd=()=>{seedv=(seedv*1664525+1013904223)|0;return (seedv>>>8)/16777216};
+  for(const [cells,amp] of [[3,.5],[6,.27],[12,.15],[24,.08]]){
+    const gw=cells+2,gh=Math.round(cells*nh/nw)+2,g=new Float32Array(gw*gh);for(let i=0;i<g.length;i++)g[i]=rnd();
+    for(let y=0;y<nh;y++){const fy=y/nh*(gh-1.001),y0=fy|0,ty=fy-y0,sy=ty*ty*(3-2*ty);
+      for(let x=0;x<nw;x++){const fx=x/nw*(gw-1.001),x0=fx|0,tx=fx-x0,sx=tx*tx*(3-2*tx),i=y0*gw+x0;
+        n[y*nw+x]+=amp*((g[i]*(1-sx)+g[i+1]*sx)*(1-sy)+(g[i+gw]*(1-sx)+g[i+gw+1]*sx)*sy)}}}
+  let lo=9,hi=-9;for(let y=0;y<nh;y++)for(let x=0;x<nw;x++){const i=y*nw+x;n[i]=n[i]*.72+.28*(1-y/nh);if(n[i]<lo)lo=n[i];if(n[i]>hi)hi=n[i]}
+  for(let i=0;i<n.length;i++)n[i]=(n[i]-lo)/(hi-lo);
+  const pr=GLX?GLX.scale():Math.min(devicePixelRatio||1,1.5);
+  burnC.width=Math.round(r.width*pr);burnC.height=Math.round(r.height*pr);
+  Object.assign(burnC.style,{left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px',display:'block'});
+  const hole=mkC(nw,nh),deco=mkC(nw,nh);
+  BURN={g:GEN,el,r,pr,nw,nh,n,t0:performance.now(),D:1500,done,hole,deco,hx:hole.getContext('2d'),dx:deco.getContext('2d'),
+    hi:new ImageData(nw,nh),di:new ImageData(nw,nh)};
+  el.style.pointerEvents='none';el.style.transition='box-shadow .7s';el.style.boxShadow='none';sBurn();
+  FIRE.x=r.left+r.width/2;FIRE.y=r.top+r.height/2;fireGlow.style.left=FIRE.x+'px';fireGlow.style.top=FIRE.y+'px';
+}
+function endBurn(){burnC.style.display='none';setFire(0);BURN=null}
+function burnStep(now){
+  const B=BURN;if(B.g!==GEN){endBurn();return}
+  const p=Math.min(1,(now-B.t0)/B.D),t=-.06+p*1.2,{n,nw,nh,r}=B,h=B.hi.data,d=B.di.data;
+  for(let i=0,j=0;i<n.length;i++,j+=4){const v=n[i]-t;
+    if(v<-.01){h[j+3]=255;d[j+3]=0}
+    else if(v<.03){h[j+3]=255;const k=Math.max(0,v)/.03;d[j]=255;d[j+1]=235-150*k;d[j+2]=150-130*k;d[j+3]=v<0?255*(1+v/.01):255}
+    else if(v<.13){h[j+3]=0;const k=(v-.03)/.1;d[j]=30+40*(1-k)*(1-k);d[j+1]=12;d[j+2]=4;d[j+3]=235*(1-k)}
+    else{h[j+3]=0;d[j+3]=0}}
+  B.hx.putImageData(B.hi,0,0);B.dx.putImageData(B.di,0,0);
+  const W=burnC.width,H=burnC.height;
+  bx_.globalCompositeOperation='source-over';bx_.clearRect(0,0,W,H);bx_.imageSmoothingEnabled=true;bx_.drawImage(B.hole,0,0,W,H);
+  bx_.globalCompositeOperation='source-in';
+  if(GLX)bx_.drawImage(GLX.canvas,r.left*B.pr,r.top*B.pr,r.width*B.pr,r.height*B.pr,0,0,W,H);else{bx_.fillStyle='#24140a';bx_.fillRect(0,0,W,H)}
+  bx_.globalCompositeOperation='source-over';bx_.drawImage(B.deco,0,0,W,H);
+  bx_.globalCompositeOperation='lighter';bx_.globalAlpha=.5;bx_.drawImage(B.deco,-2,-2,W+4,H+4);bx_.globalAlpha=1;
+  setFire(Math.sin(Math.min(1,p*1.1)*Math.PI)*(.85+Math.random()*.3));
+  if(p<.97)for(let s=0,tries=LITE?26:60;s<tries;s++){const x=(Math.random()*nw)|0,y=(Math.random()*nh)|0,v=n[y*nw+x]-t;
+    if(v>=0&&v<.05)flames.push({x:r.left+(x+.5)/nw*r.width,y:r.top+(y+.5)/nh*r.height,vx:(Math.random()-.5)*70,vy:-(25+Math.random()*150),s:.35+Math.random()*.95,l:0,m:.5+Math.random()*1.3,w:Math.random()*6.28})}
+  if(p>=1){const done=B.done;B.el.remove();endBurn();later(done,260)}
 }
 
 addEventListener('keydown',e=>{
@@ -1043,10 +1053,10 @@ menu.onclick=e=>{
   else if(m==='dir'){closeMenu();$('#dir').classList.add('open')}
   else if(m==='led'){closeMenu();openChart()}
   else if(m==='snd'){sndOn=!sndOn;b.textContent='音　'+(sndOn?'ON':'OFF');if(sndOn)audio()}
-  else if(m==='quit'){closeMenu();FIRE.i=0;R.setProperty('--fire',0);title()}
+  else if(m==='quit'){closeMenu();setFire(0);title()}
   else if(m==='restart'){
     if(!armed){armed=true;b.textContent='もう一度押すと、記録を消してやり直す';return}
-    closeMenu();GEN++;FIRE.i=0;R.setProperty('--fire',0);resetState();clearSave();drawMeters();dayStart()}
+    closeMenu();GEN++;setFire(0);resetState();clearSave();drawMeters();dayStart()}
 };
 $('#btnMenu').onclick=openMenu;
 
@@ -1136,7 +1146,7 @@ const GLX=(function(){
     gl.drawArrays(gl.TRIANGLES,0,3);
   }
   c.addEventListener('webglcontextlost',e=>e.preventDefault());c.addEventListener('webglcontextrestored',()=>location.reload());
-  return{resize,draw};
+  return{resize,draw,canvas:c,scale:()=>sc};
 })();
 
 /* ================= light layout, dust, flames ================= */
@@ -1162,6 +1172,7 @@ let lastT=0,fxDirty=false;const glowEl=$('#glow');
    const g=Math.sin(s*.83)*Math.sin(s*1.61+2.);if(g>.72)v-=(g-.72)*1.5*(.5+.5*Math.sin(s*29.));
    LAMP.i=v;LAMP.x=LAMP.bx+Math.sin(s*2.3)*7+Math.sin(s*7.1)*3;LAMP.y=LAMP.by+Math.cos(s*3.1)*5;glowEl.style.opacity=(.55+.45*v).toFixed(3)}
   if(GLX)GLX.draw(t);
+  if(BURN)burnStep(t);
   dx_.clearRect(0,0,VW,VH);const R2=Math.max(VW,VH)*.6;
   for(const p of dust){p.x+=p.vx+Math.sin(t/2600+p.p)*.08;p.y+=p.vy;if(p.y<-5){p.y=VH+5;p.x=Math.random()*VW}
     const d=Math.hypot(p.x-LAMP.x,p.y-LAMP.y)/R2,a=Math.max(0,1-d*d)*(.35+.25*Math.sin(t/900+p.p));
@@ -1172,7 +1183,7 @@ let lastT=0,fxDirty=false;const glowEl=$('#glow');
     for(let i=flames.length-1;i>=0;i--){const f=flames[i];f.l+=dt;if(f.l>=f.m){flames.splice(i,1);continue}
       const k=f.l/f.m;f.vx+=Math.sin(t/170+f.w)*90*dt;f.vy-=18*dt;f.x+=f.vx*dt;f.y+=f.vy*dt;
       const a=(1-k)*(1-k)*(.75+.25*Math.sin(t/38+f.w*7)),g=f.s*(16+12*(1-k));
-      fx_.globalAlpha=Math.min(1,a*1.25);fx_.drawImage(sparkImg,f.x-g,f.y-g,g*2,g*2);fx_.globalAlpha=Math.min(1,a*1.5);fx_.drawImage(sparkImg,f.x-g*.45,f.y-g*.45,g*.9,g*.9);
+      fx_.globalAlpha=Math.min(1,a*1.25);fx_.drawImage(sparkImg,f.x-g,f.y-g,g*2,g*2);if(!LITE){fx_.globalAlpha=Math.min(1,a*1.5);fx_.drawImage(sparkImg,f.x-g*.45,f.y-g*.45,g*.9,g*.9)}
       fx_.globalAlpha=1;fx_.strokeStyle=`rgba(255,${(250-120*k)|0},${(215-185*k)|0},${Math.min(1,a*1.6).toFixed(2)})`;fx_.lineWidth=f.s*(1.25-k*.5);
       fx_.beginPath();fx_.moveTo(f.x-f.vx*.022,f.y-f.vy*.022);fx_.lineTo(f.x,f.y);fx_.stroke()}
     fx_.globalAlpha=1;
