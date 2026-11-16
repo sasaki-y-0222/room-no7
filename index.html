@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>第七監査室 — ROOM No.7</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Klee+One:wght@400;600&family=Shippori+Mincho:wght@400;600;800&family=Zen+Kurenaido&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#231a12; --paper:#eadfc6; --gold:#c9a45c; --gold2:#8c6d33;
+  --red:#a3261d; --blue:#1d3f73; --bg:#0b0705;
+  --lx:80vw; --ly:10vh; --shx:-8px; --shy:16px; --fire:0; --fx:50vw; --fy:50vh;
+  --serif:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+  --hand:"Klee One","Shippori Mincho",serif;
+  --child:"Zen Kurenaido","Klee One",sans-serif;
+  --latin:"Cormorant Garamond","Shippori Mincho",serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:#e9dcc0;font-family:var(--serif);
+  -webkit-user-select:none;user-select:none;overscroll-behavior:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+/* ---------- desk ---------- */
+#desk{position:fixed;inset:0;display:flex;flex-direction:column;background:#1c1009;overflow:hidden}
+#desk.nogl{background:#2c1a0f var(--wood);background-size:900px 900px}
+#wood,#dust,#fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#wood{z-index:0}#dust{z-index:1;mix-blend-mode:screen}#fx{z-index:7}
+#light{position:absolute;inset:0;z-index:6;pointer-events:none;
+  background:radial-gradient(circle farthest-corner at var(--lx) var(--ly),transparent 22%,rgba(8,4,1,.34) 62%,rgba(3,1,0,.68) 100%)}
+#glow{position:absolute;inset:0;
+  background:radial-gradient(circle at var(--lx) var(--ly),rgba(255,196,110,.30),rgba(255,160,70,.10) 26vmax,transparent 50vmax)}
+#light::after{content:"";position:absolute;inset:0;opacity:var(--fire);mix-blend-mode:screen;
+  background:radial-gradient(circle at var(--fx) var(--fy),rgba(255,130,40,.42),rgba(255,90,20,.12) 34vmax,transparent 60vmax)}
+#desk.shake{animation:shake .32s cubic-bezier(.3,.7,.3,1)}
+@keyframes shake{0%{transform:translate(0,0)}18%{transform:translate(0,7px)}40%{transform:translate(-2px,-3px)}65%{transform:translate(1px,2px)}100%{transform:none}}
+
+/* ---------- HUD ---------- */
+#hud{position:relative;z-index:8;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:12px 18px 10px;background:linear-gradient(rgba(6,3,2,.82),rgba(6,3,2,0))}
+.hud-title{display:flex;flex-direction:column;line-height:1.15;margin-right:auto}
+.hud-title b{font-weight:600;letter-spacing:.32em;font-size:13px;color:var(--gold)}
+.hud-title span{font-size:12px;letter-spacing:.14em;color:#cbbd9f;opacity:.85;margin-top:3px}
+.meters{display:flex;gap:14px}
+.meter{display:flex;flex-direction:column;gap:4px;min-width:62px;position:relative}
+.meter label{font-size:11px;letter-spacing:.3em;color:#cdbf9f;display:flex;justify-content:space-between}
+.meter i{font-style:normal;font-family:var(--latin);font-size:13px;letter-spacing:0;opacity:0;transition:opacity .3s}
+.meter i.on{opacity:1}
+.meter i.up{color:#e8c77a}.meter i.dn{color:#d9785f}
+.track{height:4px;background:rgba(255,235,200,.13);border-radius:2px;position:relative;overflow:hidden}
+.track::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(255,235,200,.35)}
+.fill{position:absolute;left:0;top:0;bottom:0;width:50%;border-radius:2px;transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.m-order .fill{background:#8fa3b8}.m-people .fill{background:#e0b25a}
+.m-war .fill{background:#c2473a}.m-trust .fill{background:#c9a45c}
+.hud-btn{border:1px solid rgba(201,164,92,.45);color:var(--gold);padding:6px 11px;font-size:12px;letter-spacing:.25em;
+  border-radius:2px;background:rgba(10,6,3,.5)}
+.hud-btn:hover,.hud-btn:active{background:rgba(201,164,92,.18)}
+#btnDir{display:none}
+#btnMenu{visibility:hidden}
+body.playing #btnMenu{visibility:visible}
+
+/* ---------- stage ---------- */
+#stage{position:relative;z-index:3;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:6px 14px 4px}
+#slot{position:relative;width:min(560px,100%);height:100%;display:flex;align-items:center;justify-content:center}
+.letter{position:relative;width:100%;max-height:100%;overflow:hidden auto;touch-action:pan-y;
+  background:var(--paper) var(--grain);color:var(--ink);padding:0 0 30px;border-radius:2px;
+  box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 0 60px rgba(120,80,30,.22) inset,
+    0 1px 2px rgba(0,0,0,.6),var(--shx) var(--shy) 26px rgba(0,0,0,.55),calc(var(--shx)*2.6) calc(var(--shy)*2.6) 64px rgba(0,0,0,.4);
+  transform:rotate(var(--rot,-.6deg));will-change:transform;scrollbar-width:none;cursor:grab}
+.letter::-webkit-scrollbar{display:none}
+.letter::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,transparent 33%,rgba(90,60,20,.10) 33.2%,transparent 33.6%,transparent 66%,rgba(90,60,20,.10) 66.2%,transparent 66.6%)}
+.letter.wait{visibility:hidden}
+.letter.emerge{animation:emerge .62s cubic-bezier(.2,.85,.25,1) both}
+@keyframes emerge{from{transform:translateY(6%) scale(.62) rotate(-3deg);opacity:0}to{transform:rotate(var(--rot,-.6deg));opacity:1}}
+.letter.out-r{transition:transform .5s cubic-bezier(.5,0,.8,.4),opacity .5s;transform:translateX(130vw) rotate(16deg)!important;opacity:.6}
+.letter.back{transition:transform .35s cubic-bezier(.2,1.3,.4,1)}
+
+.env{display:flex;gap:12px;align-items:center;padding:14px 20px 12px;margin-bottom:6px;
+  background:linear-gradient(rgba(60,40,15,.13),rgba(60,40,15,.05));border-bottom:1px dashed rgba(60,40,15,.35);font-family:var(--serif)}
+.env-rows{flex:1;display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:12.5px;line-height:1.5}
+.env-rows .k{font-size:10px;letter-spacing:.3em;color:#7a6446;padding-top:2px;white-space:nowrap}
+.postmark{width:62px;height:62px;flex:none;opacity:.72;transform:rotate(-12deg);mix-blend-mode:multiply}
+.note{margin:8px 20px 0;font-size:11.5px;color:#8d2b22;letter-spacing:.08em;font-family:var(--serif)}
+.body{padding:14px 26px 0;font-family:var(--hand);font-size:clamp(15px,4.1vw,17.5px);line-height:2.05;letter-spacing:.03em}
+.body p{margin-bottom:.55em;text-wrap:pretty}
+.body .sign{text-align:right;margin-top:.9em}
+.body .ps{font-size:.9em;opacity:.85;margin-top:.8em}
+.st-child{background-color:#f1ead8;background-image:var(--grain),repeating-linear-gradient(transparent 0 2.02em,rgba(60,110,170,.22) 2.02em calc(2.02em + 1px))}
+.st-child .body{font-family:var(--child);font-size:clamp(17px,4.6vw,20px);line-height:2.05;color:#2b2b3a}
+.st-official{background-color:#e9e4d6}
+.st-official .body{font-family:var(--serif);font-size:clamp(14.5px,3.9vw,16.5px);line-height:2}
+.st-official .body::before,.st-order .body::before{content:"";display:block;width:34px;height:34px;margin:0 auto 10px;border-radius:50%;
+  border:1px solid currentColor;box-shadow:0 0 0 3px var(--c,#e9e4d6),0 0 0 4px currentColor;opacity:.55}
+.st-order{background-color:#cfd2c8;--c:#cfd2c8}
+.st-order .body{font-family:var(--serif);font-weight:600;font-size:clamp(14.5px,3.9vw,16.5px);line-height:2}
+.st-order .env{background:rgba(120,20,15,.12)}
+.st-fine .body{font-family:var(--hand);font-weight:600;letter-spacing:.06em}
+.secret{position:absolute;right:16px;top:82px;font-family:var(--serif);font-weight:800;color:var(--red);border:2px solid var(--red);
+  padding:1px 9px;letter-spacing:.3em;transform:rotate(8deg);opacity:.75;font-size:15px;mix-blend-mode:multiply}
+
+.stampmark{position:absolute;left:50%;top:46%;pointer-events:none;opacity:0;font-family:var(--serif);font-weight:800;
+  text-align:center;padding:8px 22px 9px;border:5px double currentColor;border-radius:6px;white-space:nowrap;
+  mix-blend-mode:multiply;-webkit-mask-image:var(--inkmask);mask-image:var(--inkmask);-webkit-mask-size:220px;mask-size:220px;
+  transform:translate(-50%,-50%) rotate(-11deg)}
+.stampmark b{display:block;font-size:clamp(44px,13vw,64px);letter-spacing:.18em;margin-right:-.18em;line-height:1.1}
+.stampmark span{display:block;font-family:var(--latin);font-weight:600;font-size:13px;letter-spacing:.34em;margin-top:2px}
+.stampmark.pass{color:var(--blue);transform:translate(-50%,-50%) rotate(9deg)}
+.stampmark.rej{color:var(--red)}
+.stampmark.slam{animation:slam .2s cubic-bezier(.3,0,.2,1) both}
+@keyframes slam{from{opacity:0;scale:1.5}70%{opacity:1;scale:.97}to{opacity:.92;scale:1}}
+
+/* ---------- envelope ---------- */
+.envl{position:absolute;left:50%;top:50%;width:min(400px,84%);aspect-ratio:1.6;z-index:3;perspective:900px;
+  transform:translate(-50%,-50%) rotate(-3deg)}
+.envl.in{animation:envin .52s cubic-bezier(.16,.9,.25,1) both}
+@keyframes envin{from{transform:translate(-50%,-150vh) rotate(-16deg)}to{transform:translate(-50%,-50%) rotate(-3deg)}}
+.envl.away{transition:transform .6s cubic-bezier(.5,0,.8,.4),opacity .6s;transform:translate(-50%,90vh) rotate(7deg);opacity:0}
+.e-body{position:absolute;inset:0;border-radius:3px;background:#b6966a var(--grain);overflow:hidden;
+  box-shadow:0 1px 0 rgba(255,255,255,.25) inset,0 1px 2px rgba(0,0,0,.6),var(--shx) var(--shy) 22px rgba(0,0,0,.55),calc(var(--shx)*2.4) calc(var(--shy)*2.4) 50px rgba(0,0,0,.35)}
+.e-body::before{content:"";position:absolute;inset:0;
+  background:linear-gradient(to top right,rgba(60,35,10,.16) 49.7%,transparent 50%) left/50% 100% no-repeat,
+             linear-gradient(to top left,rgba(60,35,10,.16) 49.7%,transparent 50%) right/50% 100% no-repeat}
+.e-body::after{content:"";position:absolute;left:0;right:0;top:0;height:62%;background:rgba(40,22,6,.28);clip-path:polygon(0 0,100% 0,50% 100%);opacity:0;transition:opacity .3s .15s}
+.envl.open .e-body::after{opacity:1}
+.e-flap{position:absolute;left:0;right:0;top:0;height:62%;transform-origin:50% 0;transition:transform .5s cubic-bezier(.45,0,.2,1);
+  filter:drop-shadow(0 3px 2px rgba(0,0,0,.35))}
+.e-flap::before{content:"";position:absolute;inset:0;clip-path:polygon(0 0,100% 0,50% 100%);background:#c2a477 var(--grain)}
+.envl.open .e-flap{transform:rotateX(178deg)}
+.seal{position:absolute;left:50%;top:100%;width:46px;height:46px;margin:-32px 0 0 -23px;border-radius:47% 53% 50% 50%/52% 47% 55% 46%;
+  background:radial-gradient(circle at 35% 30%,#e0584a,#8a1c15 62%,#5a0f0b);box-shadow:inset 0 0 0 6px rgba(0,0,0,.13),inset 0 2px 2px rgba(255,255,255,.3),0 2px 4px rgba(0,0,0,.55);
+  transition:opacity .2s,transform .25s}
+.seal::after{content:"";position:absolute;inset:13px;border-radius:50%;border:1.5px solid rgba(0,0,0,.28);box-shadow:0 1px 0 rgba(255,255,255,.2)}
+.seal.s-order{background:radial-gradient(circle at 35% 30%,#555,#1c1c1c 62%,#000)}
+.seal.s-fine{background:radial-gradient(circle at 35% 30%,#4f76b8,#1b3566 62%,#0e1f40)}
+.seal.s-hand,.seal.s-child{border-radius:50%;width:30px;height:30px;margin:-20px 0 0 -15px;background:#e6dcc2;box-shadow:0 1px 2px rgba(0,0,0,.4)}
+.seal.s-hand::after,.seal.s-child::after{inset:7px;border-color:rgba(90,60,20,.4)}
+.seal.s-child{background:#e7b9b0}
+.envl.open .seal{opacity:0;transform:scale(1.4) rotate(20deg)}
+
+/* ---------- directive ---------- */
+#dir{position:absolute;z-index:4;left:max(18px,calc(50% - 560px));top:50%;width:230px;transform:translateY(-50%) rotate(-2.2deg);
+  background:#d9d2bd var(--grain);color:#2a2118;padding:22px 18px 18px;font-size:13px;line-height:1.85;
+  box-shadow:0 1px 2px rgba(0,0,0,.5),var(--shx) var(--shy) 24px rgba(0,0,0,.6)}
+#dir::before{content:"";position:absolute;left:50%;top:-7px;width:15px;height:15px;margin-left:-7px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#f0d28c,#8c6d33 70%);box-shadow:0 2px 3px rgba(0,0,0,.5)}
+#dir h4{font-size:11px;letter-spacing:.4em;color:#8d2b22;border-bottom:1px solid rgba(60,40,15,.4);padding-bottom:6px;margin-bottom:8px;font-weight:600}
+#dir p{font-weight:600}
+#dir ul{list-style:none;margin-top:10px;padding-top:8px;border-top:1px dashed rgba(60,40,15,.35);font-size:11.5px;line-height:1.7;opacity:.72}
+#dir li{margin-bottom:4px;padding-left:1em;text-indent:-1em}
+#dir small{display:block;margin-top:10px;font-size:10.5px;opacity:.6;letter-spacing:.05em}
+#dirClose{display:none}
+
+/* ---------- stamps ---------- */
+#ctrl{position:relative;z-index:5;display:flex;justify-content:center;gap:min(7vw,56px);padding:0 16px calc(12px + env(safe-area-inset-bottom,0px));transition:opacity .3s}
+#ctrl.off{pointer-events:none}
+#ctrl.off .sbtn{filter:brightness(.6)}
+.sbtn{position:relative;width:min(43vw,176px);height:144px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;transition:filter .3s}
+.sbtn .well{position:absolute;inset:56px 0 0 0;border-radius:5px;border:1px solid rgba(214,180,106,.5);overflow:hidden;
+  background:#0b0a0a var(--marble);background-size:300px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 0 0 4px rgba(0,0,0,.42),inset 0 0 0 5px rgba(214,180,106,.32),inset 0 -14px 22px rgba(0,0,0,.55),0 2px 0 #050404,0 8px 14px rgba(0,0,0,.75)}
+.sbtn .well::after{content:"";position:absolute;inset:0;background:linear-gradient(112deg,transparent 28%,rgba(255,255,255,.09) 41%,rgba(255,255,255,.02) 47%,transparent 60%)}
+.sbtn .pad{position:absolute;left:50%;bottom:41px;width:108px;height:30px;margin-left:-54px;border-radius:50%;border:3.5px solid transparent;
+  box-shadow:0 5px 8px rgba(0,0,0,.85),0 1px 0 rgba(0,0,0,.9),inset 0 3px 6px rgba(0,0,0,.6),inset 0 -2px 3px rgba(255,255,255,.12)}
+.sbtn.rej .pad{background:radial-gradient(ellipse at 40% 30%,#b93328,#6d110c 72%) padding-box,
+  conic-gradient(from 200deg,#4a340f,#f7e3a6 12%,#a67f33 24%,#3b2a0c 38%,#e8cf8a 52%,#7a5a22 66%,#fff0bd 80%,#5a4215 92%,#4a340f) border-box}
+.sbtn.pass .pad{background:radial-gradient(ellipse at 40% 30%,#2f58a0,#0f2450 72%) padding-box,
+  conic-gradient(from 200deg,#4a340f,#f7e3a6 12%,#a67f33 24%,#3b2a0c 38%,#e8cf8a 52%,#7a5a22 66%,#fff0bd 80%,#5a4215 92%,#4a340f) border-box}
+.sbtn .tool{position:absolute;left:50%;bottom:52px;width:76px;height:97px;margin-left:-38px;z-index:2;will-change:transform;
+  filter:drop-shadow(-4px 7px 4px rgba(0,0,0,.65));transition:transform .14s}
+.sbtn .tool svg{display:block;width:100%;height:100%;overflow:visible}
+.sbtn:hover .tool{transform:translateY(-6px) rotate(-3deg)}
+.sbtn:active .tool{transform:translateY(-2px)}
+.sbtn .plate{position:relative;z-index:1;margin-bottom:9px;padding:3px 13px 4px 19px;border-radius:1.5px;white-space:nowrap;color:#231705;
+  background:var(--grain),linear-gradient(176deg,#f1dda0 0%,#b08a42 22%,#d9ba70 45%,#8a6a2c 58%,#c9a759 78%,#6e5320 100%);background-blend-mode:multiply,normal;
+  box-shadow:inset 0 1px 0 rgba(255,250,220,.65),inset 0 -1px 0 rgba(0,0,0,.45),inset 1px 0 0 rgba(255,250,220,.25),inset -1px 0 0 rgba(0,0,0,.3),0 2px 4px rgba(0,0,0,.85)}
+.sbtn .plate b{font-size:15px;font-weight:800;letter-spacing:.42em;text-shadow:0 1px 0 rgba(255,244,205,.6),0 -1px 0 rgba(0,0,0,.25)}
+.sbtn .plate i{font-style:normal;font-family:var(--latin);font-weight:600;font-size:10.5px;letter-spacing:.22em;opacity:.8}
+.sbtn .plate::before,.sbtn .plate::after{content:"";position:absolute;top:50%;width:4px;height:4px;margin-top:-2px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#fff3c8,#4a3510);box-shadow:0 0 0 .5px rgba(0,0,0,.5)}
+.sbtn .plate::before{left:5px}.sbtn .plate::after{right:5px}
+
+/* ---------- ledger (flow chart) ---------- */
+#chart{position:fixed;inset:0;z-index:45;background:#0d0805;overflow:auto;opacity:0;pointer-events:none;transition:opacity .3s;padding:26px 18px 50px}
+#chart.on{opacity:1;pointer-events:auto}
+.cwrap{max-width:1000px;margin:0 auto}
+.cwrap header{text-align:center;margin-bottom:6px}
+.cwrap h3{font-size:22px;letter-spacing:.6em;margin-right:-.6em;font-weight:600;color:#f2e6c9}
+.cwrap .en{font-family:var(--latin);font-size:11px;letter-spacing:.5em;color:var(--gold);margin:4px -.5em 10px 0}
+.cnote{font-size:12px;color:#9c8f76;letter-spacing:.08em;line-height:1.8}
+.ctools{display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.arc{margin-top:18px;border-top:1px solid rgba(201,164,92,.22);padding-top:10px}
+.arc h4{font-size:13px;letter-spacing:.3em;color:var(--gold);font-weight:600;margin-bottom:8px}
+.row{display:flex;align-items:flex-start;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:thin;scrollbar-color:rgba(201,164,92,.3) transparent}
+.slot{flex:none;width:172px;display:flex;flex-direction:column;gap:6px}
+.dlab{font-size:10px;letter-spacing:.3em;color:#8c7f66}
+.arr{flex:none;width:28px;height:1px;background:rgba(201,164,92,.45);margin-top:46px;position:relative}
+.arr::after{content:"";position:absolute;right:0;top:-3px;border-left:5px solid rgba(201,164,92,.7);border-top:3.5px solid transparent;border-bottom:3.5px solid transparent}
+.nd{border:1px solid rgba(233,220,192,.2);background:rgba(233,220,192,.045);padding:8px 10px 9px;border-radius:2px;min-height:60px}
+.nd b{display:block;font-size:13px;font-weight:600;color:#e9dcc0;letter-spacing:.05em}
+.nd em{display:block;font-style:normal;font-size:10.5px;color:#9c8f76;line-height:1.55;margin-top:3px}
+.nd.un{border-style:dashed;opacity:.5}
+.nd.un b{letter-spacing:.3em;color:#8c7f66}
+.nd.run{border-color:var(--gold);background:rgba(201,164,92,.11)}
+.nd.here{box-shadow:0 0 0 1px var(--gold),0 0 18px rgba(201,164,92,.55);animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 1px var(--gold),0 0 4px rgba(201,164,92,.2)}}
+.mk{display:flex;gap:6px;margin-top:7px}
+.mk i{font-style:normal;font-size:10px;letter-spacing:.15em;padding:1px 7px;border:1px solid rgba(233,220,192,.16);color:#5f5646}
+.mk i.p.on{color:#9fbdf0;border-color:#3d62a6}.mk i.r.on{color:#e69a8c;border-color:#a3392f}
+.mk i.p.now{background:#2c5296;color:#fff;border-color:#2c5296}.mk i.r.now{background:#a3302a;color:#fff;border-color:#a3302a}
+.ends{display:flex;flex-wrap:wrap;gap:6px}
+.ends span{font-size:12px;letter-spacing:.15em;padding:4px 12px;border:1px solid var(--gold);color:#f2e6c9}
+.ends span.un{border:1px dashed rgba(233,220,192,.25);color:#6f6452}
+.arc h5{font-size:11px;letter-spacing:.25em;color:#9c8f76;font-weight:400;margin:10px 0 6px}
+
+/* ---------- overlay screens ---------- */
+#screen{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:18px;
+  background:radial-gradient(ellipse at 50% 40%,rgba(20,11,5,.80),rgba(4,2,1,.96));opacity:0;pointer-events:none;transition:opacity .55s;overflow-y:auto}
+#screen.on{opacity:1;pointer-events:auto}
+#screen.title-bg{background:radial-gradient(ellipse at 50% 45%,rgba(14,8,4,.55),rgba(4,2,1,.93) 80%)}
+.card{width:min(600px,100%);margin:auto;animation:rise .8s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.go{display:block;margin:26px auto 0;padding:13px 40px;border:1px solid var(--gold);color:var(--gold);letter-spacing:.5em;
+  font-size:14px;background:rgba(201,164,92,.06);transition:background .2s,color .2s}
+.go:hover,.go:active{background:var(--gold);color:#1a1008}
+.rule{height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:18px 0;opacity:.6}
+
+.title{text-align:center}
+.title .v{display:flex;justify-content:center;align-items:stretch;gap:26px;margin-bottom:20px}
+.title .v i{width:1px;background:linear-gradient(transparent,var(--gold),transparent)}
+.title h1{writing-mode:vertical-rl;white-space:nowrap;font-size:clamp(26px,6vh,56px);font-weight:800;letter-spacing:.32em;padding:.3em 0 0;color:#f2e6c9;
+  text-shadow:0 0 40px rgba(255,190,110,.4),0 2px 10px rgba(0,0,0,.8);align-self:center}
+.title .en{font-family:var(--latin);letter-spacing:.6em;font-size:14px;color:var(--gold);margin-right:-.6em}
+.title .tag{margin-top:12px;font-size:13.5px;letter-spacing:.16em;line-height:2;color:#cbbd9f}
+.tmenu{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:22px}
+.tmenu button{width:min(260px,76vw);padding:12px 0;letter-spacing:.5em;font-size:14px;margin:0}
+.tmenu .sub2{border:1px solid rgba(201,164,92,.35);color:#cbbd9f;background:rgba(10,6,3,.35);transition:background .2s,color .2s}
+.tmenu .sub2:hover,.tmenu .sub2:active{background:rgba(201,164,92,.2);color:#f2e6c9}
+.tmenu small{font-size:11px;letter-spacing:.14em;color:#9c8f76;margin-top:-4px}
+.tmenu .lock{opacity:.45;pointer-events:none}
+.ori{display:none;margin-top:16px;font-size:11.5px;letter-spacing:.16em;color:#b9a67e}
+.ori::before{content:"▯ ";color:var(--gold)}
+#oriBar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:60;padding:7px 12px;text-align:center;font-size:12px;letter-spacing:.14em;
+  color:#1a1008;background:linear-gradient(#e2c684,#b08a42);box-shadow:0 -4px 14px rgba(0,0,0,.6)}
+@media (pointer:coarse){.ori{display:block}}
+@media (pointer:coarse) and (orientation:landscape) and (max-height:520px){#oriBar{display:block}.ori{color:var(--gold)}}
+
+.doc{background:#ded6c0 var(--grain);color:#2a2118;padding:30px 28px 26px;box-shadow:0 20px 60px rgba(0,0,0,.7);line-height:2;font-size:14.5px}
+.doc h2{text-align:center;font-size:21px;letter-spacing:.6em;margin-right:-.6em;font-weight:800;margin-bottom:4px}
+.doc .sub{text-align:center;font-family:var(--latin);letter-spacing:.4em;font-size:11.5px;color:#7a6446;margin-bottom:16px}
+.doc p{margin-bottom:.7em;text-wrap:pretty}
+.doc .dirbox{border:1px solid #8d2b22;color:#7a1f18;padding:12px 16px;margin:14px 0;font-weight:600;position:relative}
+.doc .dirbox::before{content:attr(data-h);position:absolute;top:-.95em;left:12px;background:#ded6c0;padding:0 8px;font-size:11px;letter-spacing:.35em}
+.doc dl{display:grid;grid-template-columns:auto 1fr;gap:2px 14px;font-size:13px;margin-top:10px}
+.doc dt{font-weight:800;letter-spacing:.25em;white-space:nowrap}
+.doc .go{border-color:#2a2118;color:#2a2118;background:none}
+.doc .go:hover,.doc .go:active{background:#2a2118;color:#ded6c0}
+.morning{font-size:13.5px;border-left:2px solid #7a6446;padding-left:12px;color:#4a3b2a;margin:12px 0}
+
+.np{background:#d8d4c8 var(--grain);color:#1c1814;padding:24px 24px 22px;box-shadow:0 20px 60px rgba(0,0,0,.7)}
+.np .mast{text-align:center;border-bottom:3px double #1c1814;padding-bottom:8px;margin-bottom:12px}
+.np .mast b{font-size:clamp(26px,7vw,36px);letter-spacing:.3em;margin-right:-.3em;font-weight:800}
+.np .mast span{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.2em;margin-top:4px}
+.np h3{font-size:clamp(19px,5.2vw,25px);line-height:1.5;font-weight:800;margin-bottom:10px;text-wrap:balance}
+.np li{list-style:none;font-size:14.5px;line-height:1.7;padding:9px 0;border-top:1px solid rgba(28,24,20,.35);font-weight:600}
+.np .score{margin-top:12px;padding-top:12px;border-top:3px double #1c1814;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
+.np .score div{font-size:10.5px;letter-spacing:.3em}
+.np .score b{display:block;font-family:var(--latin);font-size:22px;letter-spacing:0;line-height:1.2}
+.np .score em{font-style:normal;font-family:var(--latin);font-size:13px}
+.np .memo{font-size:12.5px;margin-top:12px;line-height:1.8;color:#4a3b2a}
+.np .go{border-color:#1c1814;color:#1c1814;background:none}
+.np .go:hover,.np .go:active{background:#1c1814;color:#d8d4c8}
+
+.end{color:#e9dcc0;padding:10px 4px 30px}
+.end .k{font-family:var(--latin);letter-spacing:.5em;font-size:12px;color:var(--gold);text-align:center}
+.end h2{font-size:clamp(34px,9vw,54px);text-align:center;font-weight:800;letter-spacing:.3em;margin:6px -.3em 4px 0;text-shadow:0 0 40px rgba(255,190,110,.3)}
+.end h3{font-size:19px;letter-spacing:.3em;color:var(--gold);margin:22px 0 6px;font-weight:600}
+.end p{font-size:14.5px;line-height:2.05;color:#d9cbac;text-wrap:pretty}
+.end .fate{display:grid;grid-template-columns:auto 1fr;gap:10px 16px;margin-top:8px}
+.end .fate dt{font-size:12px;letter-spacing:.15em;color:var(--gold);padding-top:4px;white-space:nowrap}
+.end .fate dd{font-size:14px;line-height:1.9;color:#d9cbac}
+.end .rank{text-align:center;margin-top:24px;font-size:13px;letter-spacing:.2em;color:#9c8f76}
+.end .rank b{display:block;font-size:22px;color:#f2e6c9;letter-spacing:.3em;margin-top:6px}
+
+/* ---------- pause menu ---------- */
+#menu{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:18px;
+  background:rgba(4,2,1,.72);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);opacity:0;pointer-events:none;transition:opacity .25s}
+#menu.on{opacity:1;pointer-events:auto}
+.panel{width:min(340px,100%);padding:26px 24px 22px;text-align:center;border:1px solid rgba(201,164,92,.55);
+  background:linear-gradient(#21150c,#120b06);box-shadow:0 0 0 5px #120b06,0 0 0 6px rgba(201,164,92,.3),0 30px 80px rgba(0,0,0,.8);
+  transform:translateY(10px);transition:transform .25s}
+#menu.on .panel{transform:none}
+.panel h3{font-size:18px;letter-spacing:.7em;margin-right:-.7em;color:#f2e6c9;font-weight:600}
+.panel .en{font-family:var(--latin);font-size:11px;letter-spacing:.5em;color:var(--gold);margin:4px -.5em 14px 0}
+.panel button{display:block;width:100%;padding:12px 0;margin-top:8px;font-size:13.5px;letter-spacing:.35em;color:#d9cbac;
+  border:1px solid rgba(201,164,92,.25);background:rgba(201,164,92,.04);transition:background .2s,color .2s}
+.panel button:hover,.panel button:active{background:rgba(201,164,92,.2);color:#fff3d6}
+.panel button.pri{border-color:var(--gold);color:var(--gold)}
+.panel button.warn{color:#d9785f;border-color:rgba(217,120,95,.4)}
+.panel small{display:block;margin-top:14px;font-size:10.5px;letter-spacing:.1em;color:#8c7f66;line-height:1.7}
+.only-narrow{display:none!important}
+
+/* ---------- responsive ---------- */
+@media (max-width:1080px){
+  #btnDir{display:block}
+  .only-narrow{display:block!important}
+  #dir{position:fixed;z-index:30;left:50%;top:50%;width:min(320px,86vw);transform:translate(-50%,-50%) rotate(-1.5deg);
+    display:none;font-size:14.5px;padding:28px 22px 20px;box-shadow:0 0 0 100vmax rgba(4,2,1,.8),0 20px 50px rgba(0,0,0,.7)}
+  #dir.open{display:block}
+  #dir ul{font-size:12.5px}
+  #dirClose{display:block;margin:14px auto 0;font-size:12px;letter-spacing:.4em;border:1px solid #2a2118;padding:6px 18px}
+}
+@media (max-width:640px){
+  #hud{padding:9px 12px 6px;gap:8px 8px}
+  .meters{order:3;width:100%;gap:10px}
+  .meter{flex:1;min-width:0}
+  .meter label{font-size:10px;letter-spacing:.2em}
+  .body{padding:12px 20px 0}
+  .env{padding:11px 16px 10px}
+  .postmark{width:52px;height:52px}
+  .doc{padding:24px 20px 22px;font-size:14px}
+  .sbtn{height:138px}.slot{width:150px}
+  #light{background:radial-gradient(circle farthest-corner at var(--lx) var(--ly),transparent 26%,rgba(8,4,1,.24) 68%,rgba(3,1,0,.5) 100%)}
+}
+@media (max-height:600px){.tmenu{margin-top:12px;gap:7px}.tmenu button{padding:9px 0}}
+</style>
+</head>
+<body>
+<div id="desk">
+  <canvas id="wood"></canvas>
+  <canvas id="dust"></canvas>
+  <header id="hud">
+    <div class="hud-title"><b>第七監査室</b><span id="dayLabel">—</span></div>
+    <div class="meters" id="meters"></div>
+    <button class="hud-btn" id="btnDir">通達</button>
+    <button class="hud-btn" id="btnMenu">休止</button>
+  </header>
+  <main id="stage"><div id="slot"></div></main>
+  <aside id="dir"></aside>
+  <footer id="ctrl" class="off">
+    <button class="sbtn rej" id="bRej" aria-label="差止"><span class="well"></span><span class="pad"></span><span class="tool"></span><span class="plate"><b>差止</b><i>REJECT</i></span></button>
+    <button class="sbtn pass" id="bPass" aria-label="通過"><span class="well"></span><span class="pad"></span><span class="tool"></span><span class="plate"><b>通過</b><i>PASS</i></span></button>
+  </footer>
+  <div id="light"><i id="glow"></i></div>
+  <canvas id="fx"></canvas>
+</div>
+<div id="screen"></div>
+<div id="menu"></div>
+<div id="chart"></div>
+<div id="oriBar">縦画面でのプレイを推奨します（横向きでは手紙の表示が狭くなります）</div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="burn" x="-8%" y="-8%" width="116%" height="116%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.0105" numOctaves="4" seed="7" result="n"/>
+    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0" result="na"/>
+    <feComponentTransfer in="na" result="m1"><feFuncA id="bA" type="linear" slope="40" intercept="0"/></feComponentTransfer>
+    <feComponentTransfer in="na" result="m2"><feFuncA id="bB" type="linear" slope="40" intercept="0"/></feComponentTransfer>
+    <feComponentTransfer in="na" result="m3"><feFuncA id="bC" type="linear" slope="14" intercept="0"/></feComponentTransfer>
+    <feComposite in="SourceGraphic" in2="m1" operator="in" result="paper"/>
+    <feFlood flood-color="#0e0703" flood-opacity=".9" result="blk"/>
+    <feComposite in="blk" in2="paper" operator="in" result="blkP"/>
+    <feComposite in="blkP" in2="m3" operator="out" result="char"/>
+    <feFlood flood-color="#ff8a2a" result="org"/>
+    <feComposite in="org" in2="SourceAlpha" operator="in" result="orgS"/>
+    <feComposite in="orgS" in2="m2" operator="in" result="orgM"/>
+    <feComposite in="orgM" in2="m1" operator="out" result="edge"/>
+    <feGaussianBlur in="edge" stdDeviation="4" result="glow"/>
+    <feMerge><feMergeNode in="glow"/><feMergeNode in="paper"/><feMergeNode in="char"/><feMergeNode in="edge"/></feMerge>
+  </filter>
+</svg>
+
+<script>
+'use strict';
+/* ================= textures (code-generated) ================= */
+const svgUrl=s=>`url("data:image/svg+xml,${encodeURIComponent(s)}")`;
+const R=document.documentElement.style;
+R.setProperty('--wood',svgUrl(`<svg xmlns='http://www.w3.org/2000/svg' width='900' height='900'><filter id='w' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='.006 .28' numOctaves='5' seed='11'/><feColorMatrix values='0 0 0 0 .07  0 0 0 0 .035  0 0 0 0 .015  1.5 0 0 0 -.25'/></filter><rect width='100%' height='100%' filter='url(#w)'/></svg>`));
+R.setProperty('--grain',svgUrl(`<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='g' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' seed='4'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .24  0 0 0 0 .1  .55 0 0 0 -.16'/></filter><rect width='100%' height='100%' filter='url(#g)'/></svg>`));
+R.setProperty('--marble',svgUrl(`<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='a' x='0' y='0' width='100%' height='100%'><feTurbulence type='turbulence' baseFrequency='.009 .016' numOctaves='5' seed='21'/><feColorMatrix values='0 0 0 0 .92  0 0 0 0 .9  0 0 0 0 .86  -7 0 0 0 .8'/></filter><filter id='b' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='.02' numOctaves='4' seed='5'/><feColorMatrix values='0 0 0 0 .55  0 0 0 0 .55  0 0 0 0 .6  .5 0 0 0 -.2'/></filter><rect width='100%' height='100%' filter='url(#b)'/><rect width='100%' height='100%' filter='url(#a)'/></svg>`));
+R.setProperty('--inkmask',svgUrl(`<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='m' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='.5' numOctaves='2' seed='9'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -3.2 0 0 0 2.5'/></filter><rect width='100%' height='100%' filter='url(#m)'/></svg>`));
+
+/* ================= state ================= */
+const $=s=>document.querySelector(s);
+const FRESH=()=>({day:0,idx:0,order:50,people:50,war:50,trust:70,fate:{},news:[],pass:0,rej:0,dayStart:null,fired:false,busy:true,cur:null,path:{}});
+const S=Object.assign({f:{}},FRESH());
+const F=S.f;
+const METERS=[['order','秩序'],['people','民心'],['war','戦雲'],['trust','信用']];
+const DAYN=['第一日','第二日','第三日','第四日','最終日'];
+const clamp=v=>Math.max(0,Math.min(100,v));
+let GEN=0;const later=(fn,ms)=>{const g=GEN;setTimeout(()=>{if(g===GEN)fn()},ms)};
+const LAMP={x:innerWidth*.8,y:20,z:170,i:1,bx:0,by:0},FIRE={x:0,y:0,i:0};
+
+/* ================= story ================= */
+const P=(fx,set,news,fate)=>({fx:fx||{},set,news,fate});
+const DAYS=[
+/* ---- DAY 1 ---- */
+{date:'十二月三日',dir:'物資の不足、配給の滞りに触れた私信は、これを差し止めること。',
+ morning:()=>({t:'着任初日。机の上には朱肉と二つの判、そして今日の郵袋がある。'}),
+ filler:['内務省「物資は十分にある」と重ねて表明','北部の峠に初雪　例年より十日早く'],
+ letters:[
+ ()=>({id:'d1a',st:'hand',from:'エルザ・リント（ハーゼル村）',to:'ヨナス・リント二等兵（北部国境守備隊）',pm:['ハーゼル','12.1'],
+  body:`ヨナス、元気にしていますか。
+こちらは霜が降りました。パン屋の列は朝の四時から並んでも、先週は三日つづけて何も買えませんでした。配給券はあるのに、棚が空なのです。
+でも心配はいりません。じゃがいもが少し残っています。
+お前の手袋を編んでいます。毛糸が足りないので片方は色が違うけれど、笑わないでね。`,sign:'母より',
+  pass:P({people:3,order:-2,trust:-7},'momPassed','“棚は空”——郷里の声が前線へ　兵のあいだに動揺',['family','エルザの手紙は峠に届いた。ヨナスは母の暮らしを知った。']),
+  rej:P({people:-2,trust:3},null,null,['family','エルザの手紙は焼かれた。ヨナスは何も知らない。'])}),
+ ()=>({id:'d1b',st:'hand',rot:.8,from:'匿名（ハーゼル村）',to:'国家保安局 第二課',pm:['ハーゼル','12.2'],
+  body:`保安局御中
+村の小学校の教師、アントン・ベルクについてお知らせします。
+彼は先週の授業で、地図の国境線を指して「この線の向こうにも、君たちと同じ子供が、同じ冬を過ごしている」と言いました。うちの子が聞いています。
+国歌の時間にも、口が動いていなかったそうです。
+善良な一市民として、お調べを願います。`,sign:'名は伏せます',
+  pass:P({order:5,people:-5,trust:3},'teacherArrested','ハーゼル村の教師を拘束　“敗北主義的な授業”の疑い',['teacher','アントン・ベルクは、授業の途中で連れて行かれた。']),
+  rej:P({order:-2,people:2,trust:-6},'teacherSafe',null,['teacher','密告状は焼かれた。アントン・ベルクは翌朝も教壇に立った。'])}),
+ ()=>({id:'d1c',st:'fine',rot:-1.1,from:'ミロ・ハルトマン（記者）',to:'『暁新報』編集長',pm:['中央局','12.2'],
+  body:`編集長
+同封の原稿を、明日の朝刊に。
+——配給所の棚が空なのは凶作のせいではない。中央駅の貨物係三名の証言によれば、十一月だけで穀物貨車四十二両が、行き先を「北部軍需倉庫」と書き換えられている。貨車番号の写しを添える。
+パンは無いのではない。運ばれているのだ。
+載せられないなら、理由だけ教えてください。`,sign:'M・H',
+  pass:P({order:-7,people:4,war:-3,trust:-10},'articlePublished','【暁新報】消えた穀物貨車四十二両　行き先は軍需倉庫',['milo','ミロの記事は朝刊の一面を飾った。その日の午後、彼は連行された。']),
+  rej:P({order:3,people:-3,trust:3},'articleKilled',null,['milo','原稿は編集長の机に届かなかった。'])})
+ ]},
+/* ---- DAY 2 ---- */
+{date:'十二月五日',dir:'エストリアとの往復書簡は、公私を問わず、すべて差し止めること。',
+ morning:()=>({t:F.articlePublished?'『暁新報』は昼前に売り切れた。配給所の列で、人々が記事を回し読みしている。':'『暁新報』の一面は、天気と式典の記事だった。配給所の列は今朝も長い。'}),
+ filler:['国境、全面封鎖から一か月','配給所の列、夜明け前から三百人'],
+ letters:[
+ ()=>({id:'d2a',st:'fine',from:'カタリナ・ヴァイス（医師・鉱山町グラウベルク）',to:'H・オスト教授（エストリア王立医学院）',pm:['グラウベルク','12.3'],
+  body:`恩師オスト先生
+国境が閉じてから初めての手紙です。届くかどうかも分かりません。
+グラウベルクの坑夫長屋で、子供の肺熱が広がっています。今月に入って七人。こちらの薬局に、血清はもうありません。
+先生の研究室の血清を二十人分。代金は必ず。
+国のことは、私には分かりません。子供の咳のことなら分かります。
+どうか。`,sign:'K・ヴァイス',
+  pass:P({people:7,war:-3,trust:-8},'medicine','鉱山町に“国境を越えた小包”　肺熱の子らに血清',['doctor','血清は国境を越えた。']),
+  rej:P({people:-6,trust:3},null,'グラウベルクで肺熱拡大　薬局の棚は空',['doctor','手紙は焼かれた。グラウベルクに血清は届かない。'])}),
+ ()=>({id:'d2b',st:'hand',rot:.9,from:'ユリウス',to:'ハンナ・ケラー（川沿い通り）',pm:['旧市街','12.4'],
+  body:`よく眠れているだろうか。
+あの日の約束を、僕はまだ覚えている。
+けれど、手紙では書けないことが多すぎる。
+にぎやかだった広場も、今は静かだ。
+はやく君に会いたい。
+しずかな川辺を、また二人で歩こう。
+へたな字で、すまない。`,sign:'ユリウス',ps:'追伸　いつものように、頭から読んでくれ。',
+  pass:P({order:-4,people:3},'bridge','未明の国境橋で十七家族が越境　保安局、手引きした組織を捜索',['lovers','ハンナは夜明けに橋へ行った。十七の家族が川を渡った。']),
+  rej:P({order:1},null,null,['lovers','ハンナに手紙は届かなかった。ユリウスは橋で、ひとりで朝を迎えた。'])}),
+ ()=>({id:'d2c',st:'fine',rot:-.4,from:'L・ドーレ（エストリア特使・滞在先ホテルより）',to:'外務次官 E・ハルデン閣下（私信）',pm:['中央局','12.4'],
+  body:`ハルデン閣下
+公式の場では申し上げられぬことを、私信にて。
+両国の将軍たちは、春を待たずに峠で事を起こすつもりでおります。我が国の側も、です。
+止められるのは、まだ制服を着ていない者だけです。湖畔の町ゼーブルクに、通訳を一人だけ連れてお越しいただけませんか。
+この手紙が閣下に届くかどうかが、最初の試金石でありましょう。`,sign:'L・ドーレ',
+  pass:P({war:-10,trust:-9},'peaceLetter','外務次官、週末の公務を“私用”で取り消し',['envoy','ドーレの私信は、次官の手に渡った。']),
+  rej:P({war:6,trust:3},null,null,['envoy','ドーレの私信は焼かれた。次官は何も知らない。'])}),
+ ()=>F.articlePublished?({id:'d2d1',st:'official',from:'内務省 報道監督課',to:'中央郵便監査局 局長',pm:['内務省','12.5'],
+  body:`局長殿
+十二月四日付『暁新報』掲載の記事原稿は、貴局の監査を経て配達されたものと認む。
+当該郵便物を通過させた監査官の氏名および所属室を、三日以内に報告されたい。
+なお、本件は保安局にも通知済みである。`,sign:'内務省 報道監督課長',
+  pass:P({trust:-12,order:2},'investigated'),
+  rej:P({order:-2},'hidInquiry')})
+ :({id:'d2d2',st:'hand',from:'ミロ・ハルトマン',to:'妹 レナ・ハルトマン',pm:['旧市街','12.4'],
+  body:`レナ
+原稿は編集長に届かなかった。郵便のどこかで消えたんだ。もう郵便で記事は送らない。
+旧市街の製本屋の地下に、手回しの印刷機がある。紙を五百枚、少しずつ買って届けてほしい。一度に買うと怪しまれる。
+この手紙も、誰かが読んでいるだろう。読んでいるあなたへ——あなたにも、パンを待つ家族がいるはずだ。`,sign:'ミロ',
+  pass:P({order:-4,people:3,trust:-7},'underground',null,['milo','ミロは製本屋の地下で、自分の新聞を刷りはじめた。']),
+  rej:P({order:2,trust:3},'miloIsolated',null,['milo','紙は届かなかった。ミロの印刷機は、一度も回らなかった。'])})
+ ]},
+/* ---- DAY 3 ---- */
+{date:'十二月八日',dir:'部隊の所在・移動・士気に関する記述は軍機である。これを差し止めること。',
+ morning:()=>({t:F.bridge?'五日の未明、国境の橋を十七家族が越えた。保安局は「暗号による連絡」を疑っている。':'国境の橋では、巡回が倍に増やされた。'}),
+ filler:['北部軍管区、守備隊を増強','石炭の配給、今月も半減'],
+ letters:[
+ ()=>F.momPassed?({id:'d3a1',st:'hand',from:'ヨナス・リント二等兵',to:'エルザ・リント（ハーゼル村）',pm:['野戦局','12.6'],
+  body:`母さん
+手紙、読みました。三日もパンがないなんて。
+配給の乾パンを毎日一枚ずつ残して、靴下に貯めています。
+僕らの中隊は明日、北の峠の第三監視哨へ上がります。そうなったら春まで下りられません。
+休暇の願いは破り捨てられました。今夜、僕は歩いて帰ります。納屋の裏戸の鍵を、開けておいてください。
+誰にも言わないで。`,sign:'ヨナス',
+  pass:P({people:2,order:-3,trust:-7},'jonasDeserts',null,['family','ヨナスは峠へ上がる前の夜、隊を離れた。納屋の裏戸は開いていた。']),
+  rej:P({trust:3},'jonasStays',null,['family','ヨナスの手紙は焼かれた。納屋の鍵は閉まったままで、彼は峠へ上がった。'])})
+ :({id:'d3a2',st:'hand',from:'ヨナス・リント二等兵',to:'エルザ・リント（ハーゼル村）',pm:['野戦局','12.6'],
+  body:`母さん
+もう長いこと、母さんから手紙が来ません。生きていますか。
+字を書くのがつらいなら、隣のヴェーバーおばさんに頼んで、一行だけでも。
+僕らの中隊は明日、北の峠の第三監視哨へ上がります。雪が深いそうです。隊のみんなは、向こうの兵隊を撃ちたくないと言っています。向こうもきっとそうです。
+返事をください。`,sign:'ヨナス',
+  pass:P({people:3,trust:-7},'momKnows',null,['family','エルザは息子の字を三度読み、返事を書きはじめた。']),
+  rej:P({people:-3,trust:3},'silence',null,['family','母にも息子にも、手紙は届かない。'])}),
+ ()=>F.teacherSafe?({id:'d3b1',st:'fine',rot:.7,from:'アントン・ベルク（ハーゼル小学校）ほか保護者四十一名',to:'県教育委員会',pm:['ハーゼル','12.6'],
+  body:`教育委員会御中
+当校の暖房用石炭は、十一月末に「軍需優先」として全量が引き上げられました。
+教室の気温は朝、零下二度です。子供たちは手袋をしたまま字を書いています。
+三分の一で結構です。石炭の返還をお願いいたします。
+保護者四十一名の署名を添えます。`,sign:'アントン・ベルク',
+  pass:P({people:5,order:-3,trust:-6},'coal','“教室は零下二度”　四十一名の署名、県に届く',['teacher','石炭は三分の一だけ戻った。ベルクの教室に、ストーブの音が戻った。']),
+  rej:P({people:-4,trust:3},null,null,['teacher','嘆願書は焼かれた。ベルクは自分の外套を、いちばん小さな子に着せて授業を続けている。'])})
+ :({id:'d3b2',st:'hand',rot:.7,from:'マルタ・ベルク（ハーゼル村）',to:'国際赤十字 エストリア支部',pm:['ハーゼル','12.6'],
+  body:`赤十字の皆様
+夫アントン・ベルクは十二月四日、授業の最中に連れて行かれました。行き先も罪名も、どの窓口も教えてくれません。
+夫は眼鏡がないと何も見えず、心臓の薬を朝晩のんでいます。
+この国の中に、もう頼める場所がありません。夫の名を、どうか名簿に載せてください。`,sign:'マルタ・ベルク',
+  pass:P({people:3,war:-2,order:-3,trust:-8},'redCross','赤十字、拘束中の教師の所在を照会　政府は「内政問題」',['teacher','赤十字の照会が届き、ベルクは眼鏡と薬を受け取った。春には釈放される見込みだ。']),
+  rej:P({trust:3},null,null,['teacher','マルタの手紙は焼かれた。ベルクの行方は、今も誰も知らない。'])}),
+ ()=>({id:'d3c',st:'order',rot:-.3,secret:1,note:'※ 封蝋破損のため監査に回付',from:'北部軍管区司令官 K・ブラント大将',to:'峠守備隊長（親展）',pm:['軍管区','12.7'],
+  body:`守備隊長へ
+九日未明〇四〇〇、貴隊より選抜した一個分隊に、同梱のエストリア軍外套を着用させ、我が方の第三監視哨に向けて発砲せしめよ。
+死傷者の有無は問わない。
+本件は「エストリア軍による越境攻撃」として発表される。関係者には永久の沈黙を命ずる。
+本状は読後焼却のこと。`,sign:'ブラント',
+  pass:P({war:20,trust:2},'falseFlag','北部国境、守備隊に“特別演習”命令か'),
+  rej:P({war:-10,order:-4,trust:-14},'orderBlocked')}),
+ ()=>F.medicine?({id:'d3d1',st:'child',rot:1.4,from:'トビアス（9さい）',to:'ヴァイスせんせい',pm:['グラウベルク','12.7'],
+  body:`ヴァイスせんせいへ
+せきが とまりました。いもうとの ミアも とまりました。
+おかあさんが、くすりは こっきょうの むこうの おじいさんせんせいが くれたんだよ と いいました。
+むこうのひとは わるいひとだと がっこうで ならったけど、ちがうのかな。
+おじいさんせんせいに ありがとうと つたえてください。
+えを かきました。`,sign:'トビアス',
+  pass:P({people:3,trust:-4},null,null,['doctor','血清は国境を越え、子供たちの咳は止まった。ヴァイス医師の診察室には、トビアスの絵が貼ってある。']),
+  rej:P({people:-1,trust:2},null,null,['doctor','血清は国境を越え、子供たちの咳は止まった。トビアスの絵だけが、届かなかった。'])})
+ :({id:'d3d2',st:'fine',from:'カタリナ・ヴァイス（医師）',to:'保健省 防疫局',pm:['グラウベルク','12.7'],
+  body:`防疫局御中
+グラウベルクの肺熱による死亡者名簿を同封します。十一名。最年長は九歳、最年少は生後八か月です。
+血清の要請は、これで四度目になります。
+返事がなければ、私はこの名簿を町の広場に貼ります。それが軍機に触れるというなら、どうぞ捕らえに来てください。その足で、子供たちの病室も見ていってください。`,sign:'K・ヴァイス',
+  pass:P({people:4,order:-3,trust:-6},'healthAlert','グラウベルクに防疫班派遣へ　死者十一名、遅すぎた決定',['doctor','防疫班は遅れて到着した。名簿の十一の名前は、それ以上増えなかった。']),
+  rej:P({people:-5,order:-2,trust:3},null,'鉱山町の広場に“名簿”　貼り出した女医を拘束',['doctor','ヴァイス医師は名簿を広場に貼り、その夜に拘束された。病室に、もう医者はいない。'])})
+ ]},
+/* ---- DAY 4 ---- */
+{date:'十二月十一日',dir:'エストリアを利する一切の記述を差し止めよ。判断に迷う場合は、差し止めること。迷いは不忠である。',
+ morning:()=>{let t=F.falseFlag?'九日未明、北の峠で銃撃。政府は「エストリア軍の越境攻撃」と発表した。第三監視哨で死者が出ている。':'峠は静かなままだ。ブラント大将の命令書が「郵送中に紛失」した件で、軍が局に照会を入れている。';
+   const fx={};if(F.bridge){t+='　保安局は橋の件で、暗号文を見逃した監査官を探している。';fx.trust=-6}
+   if(F.hidInquiry){t+='　内務省から「照会状が届いていない」と督促があり、局長が焼却記録を調べはじめた。';fx.trust=(fx.trust||0)-6}
+   return{t,fx}},
+ filler:['政府「国民は一致して国境を守れ」','配給、さらに一割削減へ'],
+ letters:[
+ ()=>F.bridge?({id:'d4a1',st:'hand',rot:.8,from:'ハンナ（エストリア・国境の町より）',to:'ユリウス',pm:['国境局','12.9'],
+  body:`ユリウス
+十七家族、みんな無事に渡りました。いちばん小さい子は、川の上でずっと眠っていました。
+こちらのパン屋には、朝からパンが並んでいます。それを見て泣いた人がいました。
+次は二十日、同じ場所で、もっと大勢。
+あなたも来て。もう十分やったわ。`,sign:'ハンナ',
+  pass:P({order:-5,people:4,trust:-8},'bridge2',null,['lovers','二十日の夜明け、さらに三十の家族が橋を渡った。最後にユリウスが渡り、向こう岸でハンナが待っていた。']),
+  rej:P({trust:3},null,null,['lovers','十七の家族は川を渡った。だがハンナの返事は届かず、ユリウスは橋のこちら側に残った。'])})
+ :({id:'d4a2',st:'hand',rot:.8,from:'ハンナ・ケラー',to:'ユリウスの母上',pm:['川沿い局','12.9'],
+  body:`おばさま
+ユリウスは五日の夜明け、国境の橋で巡回に捕まりました。誰かを待っていたそうです。私は、何も知らされていませんでした。
+面会は月に一度、差し入れは毛布と本だけ許されるそうです。
+私が行きます。おばさまは、どうか体を冷やさないで。`,sign:'ハンナ・ケラー',
+  pass:P({people:1},null,null,['lovers','ユリウスは橋で捕まった。ハンナは月に一度、毛布と本を持って面会に通っている。']),
+  rej:P({people:-2,trust:2},null,null,['lovers','ユリウスは橋で捕まった。彼の母は、息子がどこにいるのかを今も知らない。'])}),
+ ()=>F.peaceLetter?({id:'d4b1',st:'fine',rot:-.5,from:'外務次官 E・ハルデン',to:'L・ドーレ特使（私信）',pm:['中央局','12.10'],
+  body:`ドーレ殿
+お手紙、確かに受け取りました。届いたこと自体に、私も驚いております。
+十三日、ゼーブルクの湖畔ホテルにて。こちらは通訳を含め二名。軍には伏せてあります。${F.falseFlag?'\n九日の峠の件について、貴国がどこまでご存じか、率直に伺いたい。':''}
+互いに、制服を着ていないうちに。`,sign:'E・ハルデン',
+  pass:P({war:-14,trust:-9},'talks',null,['envoy','十三日、湖畔の町で、二人の男が通訳だけを挟んで向かい合った。']),
+  rej:P({war:5,trust:3},null,null,['envoy','次官の返事は焼かれた。ドーレは返事のないまま、帰国の列車に乗った。'])})
+ :({id:'d4b2',st:'fine',rot:-.5,from:'L・ドーレ（エストリア特使）',to:'外務次官 E・ハルデン閣下（私信・二通目）',pm:['中央局','12.10'],
+  body:`ハルデン閣下
+先の手紙にお返事をいただけませんでした。届かなかったのだと、信じることにいたします。
+これが最後の手紙です。明朝九時の列車で帰国いたします。それまで、ホテルの帳場に伝言を。
+私が列車に乗れば、次に両国が言葉を交わすのは、砲声が止んだ後になりましょう。`,sign:'L・ドーレ',
+  pass:P({war:-9,trust:-9},'talks',null,['envoy','二通目の手紙は届いた。ドーレは列車を一本遅らせ、次官は湖畔の町へ向かった。']),
+  rej:P({war:7,trust:3},null,'エストリア特使、帰国の途に',['envoy','ドーレは九時の列車で帰国した。ホームに見送りはなかった。'])}),
+ ()=>F.articlePublished?({id:'d4c1',st:'hand',note:'※ 消印なし・拘置所より持ち出しの疑い',from:'ミロ・ハルトマン',to:'『暁新報』編集長',pm:['——','—'],
+  body:`編集長
+これは看守の一人が運んでくれる。彼の弟も峠にいるそうだ。
+続報。穀物貨車の行き先を突き止めた。北の峠だ。積み替えられていたのは小麦ではなく砲弾。軍は春を待たずに始めるつもりでいる。
+裏は取れている。載せてくれ。
+僕のことは書かなくていい。`,sign:'M・H',
+  pass:P({war:-8,order:-8,people:3,trust:-10},'exposeWar','【続報】穀物貨車の積荷は砲弾　“春を待たぬ開戦準備”',['milo','ミロの続報は国じゅうで読まれた。彼は今も拘置所にいるが、看守は毎朝、新聞を差し入れている。']),
+  rej:P({order:2,trust:3},null,null,['milo','続報は焼かれた。ミロは拘置所の壁に、載らなかった記事の続きを書いている。'])})
+ :F.underground?({id:'d4c2',st:'fine',from:'地下紙『灯』',to:'各地区の配り手へ',pm:['旧市街','12.10'],
+  body:`配り手のみなさんへ
+次号のビラ文案です。
+——パンは無いのではない。倉庫にある。十五日正午、中央広場へ。石も旗もいらない。空の買い物かごだけ持って来てください。
+五百枚では足りません。読んだら隣へ回して。
+捕まった時は、製本屋の名だけは言わないで。`,sign:'灯',
+  pass:P({order:-9,people:6,trust:-9},'rally','“空の買い物かご”のビラ、市内各所に',['milo','十五日正午、広場は空の買い物かごで埋まった。ミロはその端で、黙ってメモを取っていた。']),
+  rej:P({order:3,trust:3},null,null,['milo','ビラは配られなかった。地下紙『灯』は三号で消えた。'])})
+ :({id:'d4c3',st:'hand',from:'ミロ・ハルトマン',to:'国家保安局 第二課',pm:['旧市街','12.10'],
+  body:`保安局御中
+元『暁新報』記者のハルトマンです。
+原稿は消え、紙は届かず、新聞社は私の席を片づけました。
+もう疲れました。貨物係三名の名前を、お話しする用意があります。その代わり、妹には手を出さないと約束してください。
+水曜の午後、出頭します。`,sign:'M・ハルトマン',
+  pass:P({order:5,people:-4,trust:3},null,'中央駅の貨物係三名を拘束',['milo','ミロは三人の名前を話した。妹は無事だった。彼はそれから、一行も書いていない。']),
+  rej:P({order:-1,trust:-4},null,null,['milo','申し出は届かなかった。水曜の午後、ミロは保安局の門の前まで行き、引き返した。'])}),
+ ()=>S.trust>=78?({id:'d4d1',st:'official',from:'中央郵便監査局 局長',to:'郵政省 人事局',pm:['監査局','12.11'],
+  body:`人事局長殿
+第七監査室の監査官を、主任監査官に推薦いたします。
+同人は通達に忠実で、判断に迷いがありません。差し止めた手紙について、一度も質問をしたことがない。
+来春新設される「電信監査部」の長として、最適の人材と考えます。`,sign:'中央郵便監査局 局長',
+  pass:P({trust:10},'promoted'),
+  rej:P({trust:-3},'refusedPromo')})
+ :({id:'d4d2',st:'official',from:'第四監査室 監査官',to:'中央郵便監査局 局長',pm:['局内便','12.11'],
+  body:`局長殿
+同僚を告げるのは本意ではありませんが、職責として申し上げます。
+第七監査室の差止率は、他室に比べ著しく低いように見受けられます。通達に抵触する郵便物が、複数、同室を通過した疑いがあります。
+同室の通過記録の精査を、お願い申し上げます。`,sign:'第四監査室',
+  pass:P({trust:-16},'honest'),
+  rej:P({},'selfProtect')})
+ ]},
+/* ---- DAY 5 ---- */
+{date:'十二月十四日',dir:'本日、新たな通達はない。局長は不在である。',
+ morning:()=>({t:(F.talks?'昨日、外務次官が“私用”で湖畔の町へ出かけた、という噂がある。':'エストリア特使は帰国した。外務省の廊下は静かだ。')+(F.falseFlag?'　峠の銃撃以来、駅には軍用列車が並んでいる。':'')}),
+ filler:['初雪、首都にも','年末の特別配給、見送り'],
+ letters:[
+ ()=>{
+  if(F.jonasDeserts)return{id:'d5a1',st:'hand',from:'エルザ・リント（ハーゼル村）',to:'妹 グレーテ（国境の町）',pm:['ハーゼル','12.12'],
+   body:`グレーテ
+納屋に、迷い猫を一匹かくまっています。よく食べる、大きな猫です。昼は干し草の中で眠り、夜だけ出てきます。
+この猫に、亡くなったお義兄さんの古い外套を送ってもらえませんか。それと、川向こうの叔父さんの住所を。
+猫は、春までここには置けないのです。
+色の違う手袋は、ちゃんと合いました。`,sign:'エルザ',
+   pass:P({people:2,trust:-5},null,null,['family','外套と住所が届いた。“猫”はある夜、川向こうへ出て行った。エルザの納屋は、いま空っぽだ。']),
+   rej:P({trust:2},null,null,['family','外套も住所も届かなかった。月末の一斉捜索で、納屋の干し草の中からヨナスが見つかった。'])};
+  if(F.falseFlag)return{id:'d5a2',st:'official',from:'北部軍管区 人事部',to:'エルザ・リント殿（ハーゼル村）',pm:['軍管区','12.12'],
+   body:`エルザ・リント殿
+ご子息ヨナス・リント二等兵は、十二月九日未明、北の峠第三監視哨において、エストリア軍の越境攻撃により名誉の戦死を遂げられました。
+ここに謹んで通知いたします。
+遺品は追って送付いたします（乾パン若干、書きかけの手紙一通）。`,sign:'北部軍管区 人事部',
+   pass:P({people:-2},null,null,['family','エルザは公報を受け取った。編みかけの手袋は、引き出しにしまわれた。息子を撃った弾が自国のものだったことを、彼女は知らない。']),
+   rej:P({},null,null,['family','戦死公報は焼かれた。エルザは今も、峠の息子に宛てて手紙を書き続けている。'])};
+  if(F.jonasStays)return{id:'d5a3',st:'hand',from:'ヨナス・リント二等兵',to:'エルザ・リント（ハーゼル村）',pm:['野戦局','12.12'],
+   body:`母さん
+峠は静かです。向こうの監視哨の兵隊が、朝、手を振ってきました。こっちも振り返しました。上官は見ないふりをしています。
+二十日から五日間、休暇が出ました。夕方の汽車で着きます。
+駅まで来なくていいです。寒いから。でも、もし来てくれたら、うれしい。`,sign:'ヨナス',
+   pass:P({people:2,trust:-5},null,null,['family','二十日の夕方、エルザは駅にいた。二人は黙って、一つのパンを分けた。']),
+   rej:P({trust:2},null,null,['family','休暇の知らせは焼かれた。ヨナスは誰もいないホームに降り、家まで歩いた。戸口の母は、声も出なかった。'])};
+  if(F.momKnows)return{id:'d5a4',st:'hand',from:'エルザ・リント（ハーゼル村）',to:'ヨナス・リント二等兵',pm:['ハーゼル','12.12'],
+   body:`ヨナス
+生きています。お前の字を見て、三日ぶりに起き上がりました。
+手紙は書いていたのよ、何通も。どこで消えたのかしら。
+手袋を送ります。片方の色が違うけれど、笑わないで。
+向こうの兵隊さんも、誰かの息子です。撃たずに済むなら、それがいちばんいい。`,sign:'母より',
+   pass:P({people:2,trust:-5},null,null,['family','色の違う手袋は峠に届いた。ヨナスは見張りの夜ごとに、それをはめている。']),
+   rej:P({trust:2},null,null,['family','母の返事は、また消えた。ヨナスは峠で、三通目の「生きていますか」を書いている。'])};
+  return{id:'d5a5',st:'hand',from:'ヴェーバー（ハーゼル村・隣人）',to:'ヨナス・リント二等兵',pm:['ハーゼル','12.12'],
+   body:`ヨナスさん
+お隣のヴェーバーです。つらい知らせを書かねばなりません。
+お母さんは今月の初めに寝込まれて、十日の朝に亡くなりました。枕元に、宛名を書いた封筒が何通もありました。出しても返事が来ないのだと、よくおっしゃっていました。
+編みかけの手袋を同封します。片方の色が違います。`,sign:'ヴェーバー',
+   pass:P({},null,null,['family','ヨナスは峠で母の死を知った。色の違う手袋を、彼は両手にはめている。']),
+   rej:P({},null,null,['family','エルザは十日の朝に亡くなった。ヨナスはそれを知らず、今も峠から母に手紙を書いている。'])};
+ },
+ ()=>{
+  if(F.talks&&!F.falseFlag)return{id:'d5b1',st:'official',secret:1,from:'外務次官 E・ハルデン',to:'大統領閣下（親展）',pm:['外務省','12.14'],
+   body:`大統領閣下
+ゼーブルクにて、エストリア特使と覚書の草案に合意いたしました。
+一、両軍は峠の稜線より十キロ後退する。
+一、国境を越える医薬品と私信は、これを妨げない。
+軍は反対するでしょう。しかし閣下の署名があれば、冬のあいだに一発の弾も撃たずに済みます。
+ご裁可を願います。`,sign:'E・ハルデン',
+   pass:P({war:-20,order:-3,people:5,trust:-8},null,'ゼーブルク覚書、大統領に提出　両軍後退案'),
+   rej:P({war:10,trust:3})};
+  if(F.talks)return{id:'d5b2',st:'fine',from:'L・ドーレ（エストリア特使）',to:'外務次官 E・ハルデン閣下',pm:['国境局','12.14'],
+   body:`ハルデン閣下
+九日の峠の銃撃について。発砲した分隊が着ていた我が国の外套は、三年前に貴国が鹵獲した型のものです。我々はその記録を持っています。
+公表すれば貴国の政府は倒れ、我々の将軍は喜んで進軍するでしょう。どちらも私の望みではありません。
+閣下の手で、貴国の内側から明らかにしていただけませんか。猶予は三日です。`,sign:'L・ドーレ',
+   pass:P({war:-16,order:-8,trust:-8},null,'峠の銃撃は“自作自演”か　外務次官が調査を要求'),
+   rej:P({war:10,trust:3})};
+  if(F.falseFlag)return{id:'d5b3',st:'order',from:'大統領府',to:'全国郵便局長（至急・掲示用）',pm:['大統領府','12.14'],
+   body:`布告
+十二月九日、エストリア軍は北の峠において我が監視哨を攻撃し、我が将兵の血を流した。
+共和国はここに総動員を令する。
+十八歳より四十五歳の男子は、三日以内に最寄りの連隊区に出頭せよ。
+本布告は、全国の郵便局に遅滞なく掲示すべし。`,sign:'大統領',
+   pass:P({war:12,trust:3},null,'総動員令、全国に布告'),
+   rej:P({war:-6,order:-5,trust:-20},'delayed','総動員令、掲示されず　“郵送中の事故”で三日の遅れ')};
+  return{id:'d5b4',st:'order',secret:1,from:'北部軍管区司令官 K・ブラント大将',to:'大統領閣下（親展）',pm:['軍管区','12.13'],
+   body:`大統領閣下
+峠守備隊への命令書は、郵送の途上で何者かに握りつぶされました。軍の内にか、郵便の内にか、敗北主義者がおります。
+しかし機はまだ去っておりません。雪が峠を閉ざす前に、開戦のご裁可を。口実は、こちらで用意いたします。
+春になれば、エストリアは倍の兵を峠に置くでしょう。`,sign:'K・ブラント',
+   pass:P({war:14,trust:3},null,'軍、大統領に“決断”を上申'),
+   rej:P({war:-8,trust:-12})};
+ },
+ ()=>({id:'d5c',st:'hand',rot:0,note:'※ 最後の一通は、あなた自身の手紙だ',from:'第七監査室 監査官（あなた）',to:'国外通信社 特派員',pm:['未投函','—'],
+  body:`私は中央郵便監査局、第七監査室の監査官である。
+この五日間で、私は${S.pass}通の手紙を通し、${S.rej}通を焼いた。
+同封するのは、その全ての記録と、通達の原本である。誰が何を書き、誰がそれを読ませまいとしたか。判断は、読む人に委ねる。
+私は命令に従った日もあり、従わなかった日もある。どちらの日も、机の上の手紙は、誰かの声だった。
+この手紙を通すかどうかを決めるのも、私である。`,sign:'第七監査室にて',
+  pass:P({order:-10,people:8,war:-4},'whistle','【国外紙】“検閲官の手記”を全文掲載'),
+  rej:P({},'burned')})
+ ]}
+];
+
+/* ================= save ================= */
+const KEY='room7.save.v1';
+function save(phase){try{localStorage.setItem(KEY,JSON.stringify({v:1,phase,day:S.day,idx:S.idx,order:S.order,people:S.people,war:S.war,trust:S.trust,f:S.f,fate:S.fate,news:S.news,pass:S.pass,rej:S.rej,dayStart:S.dayStart,path:S.path}))}catch(e){}}
+function loadSave(){try{const d=JSON.parse(localStorage.getItem(KEY));return d&&d.v===1&&DAYS[d.day]?d:null}catch(e){return null}}
+function clearSave(){try{localStorage.removeItem(KEY)}catch(e){}}
+const PKEY='room7.ledger.v1';
+const PROG=(()=>{try{const d=JSON.parse(localStorage.getItem(PKEY));if(d&&d.seen)return d}catch(e){}return{seen:{},ends:{w:{},c:{},y:{}},cleared:0,hints:false}})();
+const saveProg=()=>{try{localStorage.setItem(PKEY,JSON.stringify(PROG))}catch(e){}};
+function resetState(){Object.assign(S,FRESH());for(const k in F)delete F[k]}
+
+/* ================= audio ================= */
+let AC=null,sndOn=true,noiseBuf=null;
+function audio(){
+  if(AC||!sndOn)return;
+  try{AC=new (window.AudioContext||window.webkitAudioContext)();
+    noiseBuf=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);
+    const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+  }catch(e){AC=null}
+}
+function noise(dur,type,f0,f1,vol,when=0){
+  if(!AC||!sndOn)return;const t=AC.currentTime+when;
+  const s=AC.createBufferSource();s.buffer=noiseBuf;
+  const fl=AC.createBiquadFilter();fl.type=type;fl.frequency.setValueAtTime(f0,t);fl.frequency.exponentialRampToValueAtTime(f1,t+dur);
+  const g=AC.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  s.connect(fl).connect(g).connect(AC.destination);s.start(t,Math.random()*.5,dur+.05);
+}
+function thud(){
+  if(!AC||!sndOn)return;const t=AC.currentTime;
+  const o=AC.createOscillator(),g=AC.createGain();o.frequency.setValueAtTime(120,t);o.frequency.exponentialRampToValueAtTime(38,t+.18);
+  g.gain.setValueAtTime(.9,t);g.gain.exponentialRampToValueAtTime(.0001,t+.3);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+.32);
+  noise(.09,'lowpass',1800,300,.5);
+}
+const sPaper=()=>noise(.32,'bandpass',900,3200,.12);
+const sFly=()=>noise(.4,'bandpass',2600,700,.1);
+const sTear=()=>{noise(.16,'highpass',1800,5200,.11);noise(.22,'bandpass',1200,2600,.08,.12)};
+function sBurn(){noise(1.7,'lowpass',900,260,.26);noise(1.5,'bandpass',2400,1200,.05);
+  for(let i=0;i<16;i++)noise(.03+Math.random()*.03,'highpass',1600+Math.random()*2500,5000,.1+Math.random()*.12,Math.random()*1.4)}
+
+/* ================= HUD ================= */
+$('#meters').innerHTML=METERS.map(([k,l])=>`<div class="meter m-${k}" id="m-${k}"><label>${l}<i></i></label><div class="track"><div class="fill"></div></div></div>`).join('');
+function drawMeters(delta){
+  for(const [k] of METERS){
+    const el=$('#m-'+k);el.querySelector('.fill').style.width=S[k]+'%';
+    const i=el.querySelector('i'),d=delta&&delta[k];
+    if(d){i.textContent=(d>0?'▲':'▼');i.className='on '+(d>0?'up':'dn');clearTimeout(i._t);i._t=setTimeout(()=>i.className='',1900)}
+  }
+}
+function apply(fx){const d={};for(const k in fx){const b=S[k];S[k]=clamp(S[k]+fx[k]);if(S[k]!==b)d[k]=S[k]-b}drawMeters(d)}
+function drawDir(){
+  const prev=DAYS.slice(0,S.day).filter((_,i)=>i<4).map((d,i)=>`<li>第${'一二三四'[i]}号　${d.dir}</li>`).join('');
+  $('#dir').innerHTML=`<h4>通達　${S.day<4?'第'+'一二三四'[S.day]+'号':'——'}</h4><p>${DAYS[S.day].dir}</p>${prev?`<ul>${prev}</ul>`:''}<small>通達は累積する。差し止めた手紙は焼却され、誰にも届かない。</small><button id="dirClose">閉じる</button>`;
+}
+$('#btnDir').onclick=()=>$('#dir').classList.toggle('open');
+$('#dir').onclick=()=>$('#dir').classList.remove('open');
+
+/* ================= stamps (tools) ================= */
+function stampSVG(k){
+  const m=k==='rej'?{a:'#cf6a5c',b:'#8f2d24',c:'#3a0d0a',v:'1 0 0 0 1  0 0 0 0 .86  0 0 0 0 .78',ink:'#c9382c',sd:3}
+                   :{a:'#5a86d2',b:'#22488f',c:'#0a1a3c',v:'1 0 0 0 .9  0 0 0 0 .93  0 0 0 0 1',ink:'#3460a8',sd:14};
+  const HN='M21 17 C21 14.5,51 14.5,51 17 L47.5 57 L24.5 57 Z';
+  const CP='M19.5 18 C19 8,29 5.5,33 5.2 A3.6 3.6 0 1 1 39 5.2 C43 5.5,53 8,52.5 18 Z';
+  const BS='M23 56 h26 a2 2 0 0 1 2 2 v4 C52 70,58 76,63 80 h2 a1.5 1.5 0 0 1 1.5 1.5 v4 H5.5 v-4 A1.5 1.5 0 0 1 7 80 h2 C14 76,20 70,21 62 v-4 a2 2 0 0 1 2 -2 Z';
+  return `<svg viewBox="0 0 72 92"><defs>
+   <radialGradient id="m${k}" cx="36%" cy="20%" r="90%"><stop offset="0" stop-color="${m.a}"/><stop offset=".45" stop-color="${m.b}"/><stop offset="1" stop-color="${m.c}"/></radialGradient>
+   <linearGradient id="sh${k}" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".62"/><stop offset=".3" stop-color="#000" stop-opacity="0"/><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".7"/></linearGradient>
+   <linearGradient id="br${k}" x1="0" x2="1"><stop offset="0" stop-color="#2e2008"/><stop offset=".1" stop-color="#8f6d2a"/><stop offset=".24" stop-color="#fff3c4"/><stop offset=".34" stop-color="#d4ae5c"/><stop offset=".52" stop-color="#6b4e17"/><stop offset=".7" stop-color="#b8923f"/><stop offset=".84" stop-color="#e9d08c"/><stop offset="1" stop-color="#33230a"/></linearGradient>
+   <linearGradient id="bv${k}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset=".35" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></linearGradient>
+   <filter id="v${k}" x="0" y="0" width="100%" height="100%"><feTurbulence type="turbulence" baseFrequency=".028 .05" numOctaves="4" seed="${m.sd}"/><feColorMatrix values="0 0 0 0 ${m.v.split('  ')[0].split(' ')[4]}  0 0 0 0 ${m.v.split('  ')[1].split(' ')[4]}  0 0 0 0 ${m.v.split('  ')[2].split(' ')[4]}  -6.5 0 0 0 .92"/></filter>
+   <filter id="c${k}" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".05" numOctaves="3" seed="${m.sd+2}"/><feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.4 0 0 0 -.5"/></filter>
+   <filter id="g${k}" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".13 .09" numOctaves="3" seed="${m.sd+5}"/><feColorMatrix values="0 0 0 0 .13  0 0 0 0 .09  0 0 0 0 .03  2.6 0 0 0 -1.2"/></filter>
+   <clipPath id="ch${k}"><path d="${HN}"/></clipPath><clipPath id="cb${k}"><path d="${BS} ${CP}"/></clipPath></defs>
+   <path d="${HN}" fill="url(#m${k})"/>
+   <g clip-path="url(#ch${k})"><rect width="72" height="60" filter="url(#c${k})" opacity=".5"/><rect width="72" height="60" filter="url(#v${k})" opacity=".9"/><rect width="72" height="60" fill="url(#sh${k})"/>
+     <ellipse cx="36" cy="57" rx="12" ry="5" fill="#000" opacity=".4"/></g>
+   <path d="M27.5 19 L29.5 55" stroke="#fff" stroke-opacity=".34" stroke-width="2.2" stroke-linecap="round"/>
+   <path d="M31.5 19 L32.6 55" stroke="#fff" stroke-opacity=".12" stroke-width="1" stroke-linecap="round"/>
+   <path d="${CP}" fill="url(#br${k})"/><path d="${CP}" fill="url(#bv${k})"/>
+   <ellipse cx="29" cy="10.5" rx="5.5" ry="2" fill="#fff" opacity=".5" transform="rotate(-24 29 10.5)"/>
+   <path d="${BS}" fill="url(#br${k})"/><path d="${BS}" fill="url(#bv${k})"/>
+   <g clip-path="url(#cb${k})"><rect width="72" height="90" filter="url(#g${k})" opacity=".5"/>
+     <path d="M20 16.6 H52" stroke="#1f1404" stroke-opacity=".55" stroke-width=".8"/>
+     <path d="M19 62.6 H53 M12.5 78 H59.5 M4 80.6 H68" stroke="#1f1404" stroke-opacity=".6" stroke-width=".8"/>
+     <path d="M19 63.5 H53 M12.5 78.9 H59.5 M4 81.5 H68 M21 56.8 H51" stroke="#fff6cf" stroke-opacity=".45" stroke-width=".6"/></g>
+   <rect x="7.5" y="85.5" width="57" height="5" rx="1.2" fill="#14100d"/>
+   <rect x="8.5" y="88.8" width="55" height="1.7" rx=".8" fill="${m.ink}"/></svg>`;
+}
+$('#bRej .tool').innerHTML=stampSVG('rej');$('#bPass .tool').innerHTML=stampSVG('pass');
+function strike(kind,el){
+  const tool=$(kind==='pass'?'#bPass .tool':'#bRej .tool');if(!tool.animate)return;
+  const a=tool.getBoundingClientRect(),b=el.getBoundingClientRect();
+  const tx=b.left+b.width/2-(a.left+a.width/2),ty=b.top+b.height*.46-(a.top+a.height*.8);
+  const hit=`translate(${tx}px,${ty}px) scale(1.55) rotate(${kind==='pass'?6:-7}deg)`;
+  tool.animate([{transform:'none',easing:'cubic-bezier(.3,0,.3,1)'},
+    {transform:`translate(${tx*.9}px,${ty-70}px) scale(1.95) rotate(${kind==='pass'?12:-14}deg)`,offset:.38,easing:'cubic-bezier(.7,0,1,.6)'},
+    {transform:hit,offset:.5},{transform:hit,offset:.66,easing:'cubic-bezier(.3,0,.2,1)'},{transform:'none'}],{duration:720});
+}
+
+/* ================= letter ================= */
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+function postmark(a,b){return `<svg class="postmark" viewBox="0 0 64 64"><g fill="none" stroke="#3a2a4a" stroke-width="1.6"><circle cx="32" cy="32" r="29"/><circle cx="32" cy="32" r="19.5" stroke-width="1"/><path d="M4 32h56" stroke-width="1"/></g><g fill="#3a2a4a" text-anchor="middle" font-family="Shippori Mincho,serif" font-weight="600"><text x="32" y="27" font-size="${a.length>4?7:9}">${esc(a)}</text><text x="32" y="43" font-size="10" font-family="Cormorant Garamond,serif">${esc(b)}</text></g></svg>`}
+function showLetter(){
+  const L=DAYS[S.day].letters[S.idx]();S.cur=L;S.busy=true;save('letter');if(!PROG.seen[L.id]){PROG.seen[L.id]={};saveProg()}
+  const el=document.createElement('article');
+  el.className='letter wait st-'+L.st;el.style.setProperty('--rot',(L.rot??-.6)+'deg');
+  el.innerHTML=`<div class="env"><div class="env-rows"><span class="k">差出人</span><span>${esc(L.from)}</span><span class="k">宛　先</span><span>${esc(L.to)}</span></div>${postmark(L.pm[0],L.pm[1])}</div>
+   ${L.note?`<div class="note">${esc(L.note)}</div>`:''}${L.secret?'<div class="secret">極秘</div>':''}
+   <div class="body">${L.body.split('\n').map(p=>`<p>${esc(p)}</p>`).join('')}<p class="sign">${esc(L.sign)}</p>${L.ps?`<p class="ps">${esc(L.ps)}</p>`:''}</div>
+   <div class="stampmark"></div>`;
+  const ev=document.createElement('div');ev.className='envl in';
+  ev.innerHTML=`<div class="e-body"></div><div class="e-flap"><i class="seal s-${L.st}"></i></div>`;
+  const slot=$('#slot');slot.innerHTML='';slot.appendChild(el);slot.appendChild(ev);
+  $('#dayLabel').textContent=`${DAYN[S.day]}　${DAYS[S.day].date}　—　${S.idx+1} / ${DAYS[S.day].letters.length} 通`;
+  sPaper();bindDrag(el);
+  later(()=>{ev.classList.remove('in');ev.classList.add('open');sTear()},540);
+  later(()=>{el.classList.remove('wait');el.classList.add('emerge');ev.classList.add('away');sPaper()},960);
+  later(()=>{el.classList.remove('emerge');ev.remove();S.busy=false;$('#ctrl').classList.remove('off')},1600);
+}
+function bindDrag(el){
+  let sx=0,sy=0,dx=0,drag=false,down=false;const mark=el.querySelector('.stampmark');
+  el.addEventListener('pointerdown',e=>{if(S.busy)return;down=true;drag=false;sx=e.clientX;sy=e.clientY;dx=0;el.classList.remove('back')});
+  el.addEventListener('pointermove',e=>{
+    if(!down||S.busy)return;dx=e.clientX-sx;const dy=e.clientY-sy;
+    if(!drag&&Math.abs(dx)>12&&Math.abs(dx)>Math.abs(dy)*1.3){drag=true;try{el.setPointerCapture(e.pointerId)}catch(_){}}
+    if(drag){el.style.transform=`translateX(${dx}px) rotate(${dx*.035}deg)`;
+      mark.className='stampmark '+(dx>0?'pass':'rej');mark.innerHTML=dx>0?'<b>通過</b><span>PASSED · No.7</span>':'<b>差止</b><span>REJECTED · No.7</span>';
+      mark.style.opacity=Math.min(.55,Math.abs(dx)/260)}
+  });
+  const up=()=>{if(!down)return;down=false;if(!drag)return;drag=false;
+    if(Math.abs(dx)>105){decide(dx>0?'pass':'rej')}
+    else{el.classList.add('back');el.style.transform='';mark.style.opacity=0}};
+  el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);
+}
+function decide(kind){
+  if(S.busy||!S.cur||menuOpen()||chartEl.classList.contains('on'))return;S.busy=true;audio();
+  const el=$('#slot .letter'),mark=el.querySelector('.stampmark'),L=S.cur,o=L[kind];
+  $('#ctrl').classList.add('off');
+  el.classList.add('back');el.style.transform='';mark.style.opacity=0;
+  later(()=>strike(kind,el),60);
+  later(()=>{
+    mark.style.opacity='';mark.className='stampmark '+kind;
+    mark.innerHTML=kind==='pass'?'<b>通過</b><span>PASSED · No.7</span>':'<b>差止</b><span>REJECTED · No.7</span>';
+    void mark.offsetWidth;mark.classList.add('slam');thud();
+    const d=$('#desk');d.classList.remove('shake');void d.offsetWidth;d.classList.add('shake');
+  },420);
+  later(()=>{S.path[L.id]=kind;PROG.seen[L.id][kind==='pass'?'p':'r']=1;saveProg();S[kind]++;if(o.set)F[o.set]=true;if(o.news)S.news.push(o.news);if(o.fate)S.fate[o.fate[0]]=o.fate[1];apply(o.fx)},620);
+  const next=()=>{S.idx++;if(S.idx<DAYS[S.day].letters.length)showLetter();else evening()};
+  if(kind==='pass'){
+    later(()=>{el.classList.remove('back');el.classList.add('out-r');sFly()},1150);
+    later(next,1700);
+  }else later(()=>burnLetter(el,next),1150);
+}
+$('#bPass').onclick=()=>decide('pass');$('#bRej').onclick=()=>decide('rej');
+
+/* ================= burn ================= */
+const bA=$('#bA'),bB=$('#bB'),bC=$('#bC'),flames=[];
+function burnLetter(el,done){
+  const g=GEN,r=el.getBoundingClientRect(),t0=performance.now(),D=1550;
+  el.style.filter='url(#burn)';el.style.pointerEvents='none';sBurn();
+  FIRE.x=r.left+r.width/2;FIRE.y=r.top+r.height/2;
+  R.setProperty('--fx',FIRE.x+'px');R.setProperty('--fy',FIRE.y+'px');
+  (function step(now){
+    if(g!==GEN){FIRE.i=0;R.setProperty('--fire',0);return}
+    const p=Math.min(1,(now-t0)/D),t=.16+p*p*.25+p*.5;
+    bA.setAttribute('intercept',-40*t);bB.setAttribute('intercept',-40*(t-.028));bC.setAttribute('intercept',-14*(t+.012));
+    FIRE.i=Math.sin(Math.min(1,p*1.12)*Math.PI)*(.85+Math.random()*.3);R.setProperty('--fire',FIRE.i.toFixed(3));
+    if(p<.95){const n=p<.12?4:11;for(let i=0;i<n;i++)flames.push({x:r.left+Math.random()*r.width,y:r.top+Math.random()*r.height,
+        vx:(Math.random()-.5)*70,vy:-(25+Math.random()*150),s:.35+Math.random()*.95,l:0,m:.5+Math.random()*1.3,w:Math.random()*6.28})}
+    if(p<1)requestAnimationFrame(step);
+    else{el.remove();FIRE.i=0;R.setProperty('--fire',0);later(done,260)}
+  })(t0);
+}
+
+addEventListener('keydown',e=>{
+  if(chartEl.classList.contains('on')){if(e.key==='Escape')chartEl.classList.remove('on');return}
+  if(e.key==='Escape'){if(menuOpen())closeMenu();else if(document.body.classList.contains('playing'))openMenu();return}
+  if(menuOpen())return;
+  if($('#screen').classList.contains('on')){if(e.key==='Enter'||e.key===' '){const g=$('#screen .go');if(g){e.preventDefault();g.click()}}return}
+  if(e.key==='ArrowRight'||e.key==='d'||e.key==='D')decide('pass');
+  if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A')decide('rej');
+});
+
+/* ================= screens ================= */
+const scr=$('#screen');
+function show(html,acts,cls){
+  if(typeof acts==='function')acts={go:acts};
+  const g=GEN;scr.classList.remove('on');
+  setTimeout(()=>{if(g!==GEN)return;scr.innerHTML=html;scr.scrollTop=0;scr.className='on '+(cls||'');
+    scr.querySelectorAll('[data-a],.go').forEach(b=>{const f=acts[b.dataset.a||'go'];if(f)b.onclick=()=>{audio();sPaper();f()}})},scr.innerHTML?420:0);
+}
+const hide=()=>scr.classList.remove('on');
+
+function title(){
+  GEN++;document.body.classList.remove('playing');$('#slot').innerHTML='';$('#ctrl').classList.add('off');$('#dayLabel').textContent='—';
+  const sv=loadSave();
+  show(`<div class="card title"><div class="v"><i></i><h1>第七監査室</h1><i></i></div>
+   <div class="en">ROOM No.7</div>
+   <p class="tag">手紙を読む。判を捺す。<br>通すか、止めるか——それだけの仕事。</p>
+   <div class="tmenu">
+    ${sv?`<button class="go" data-a="cont">つづきから</button><small>${DAYN[sv.day]}　${DAYS[sv.day].date}　／　通過 ${sv.pass}・差止 ${sv.rej}</small>`:''}
+    <button class="${sv?'sub2':'go'}" data-a="new">はじめから</button>
+    <button class="sub2${PROG.cleared?'':' lock'}" data-a="led">記録簿</button>${PROG.cleared?'':'<small>記録簿は、一度結末を迎えると開く</small>'}
+    <button class="sub2" data-a="how">遊び方</button>
+   </div><p class="ori">スマートフォンは縦画面推奨</p></div>`,{cont:()=>resume(sv),new:()=>{resetState();clearSave();drawMeters();intro()},how,led:openChart},'title-bg');
+}
+function how(){
+  show(`<div class="card doc"><h2>遊び方</h2><div class="sub">HOW TO PLAY</div>
+   <p>机に届く手紙を読み、<b>通過</b>か<b>差止</b>の判を捺します。通過させた手紙は宛先に届き、差し止めた手紙は焼却されます。</p>
+   <p>毎朝の<b>通達</b>が「差し止めるべきもの」を定めます。従えば局内の信用は保たれ、背けば誰かに手紙が届きます。判断は次の日の手紙と、人々と国の行方を変えます。</p>
+   <dl><dt>判を捺す</dt><dd>下の判を押す ／ 手紙を左右にスワイプ ／ ← → キー（A・D）</dd>
+   <dt>通達</dt><dd>机の左のメモ（スマホは上部の「通達」）</dd>
+   <dt>休止</dt><dd>右上の「休止」または Esc。中断・やり直しはここから</dd>
+   <dt>記録</dt><dd>手紙ごとに自動で保存され、「つづきから」で再開できます</dd></dl>
+   <button class="go">戻る</button></div>`,title);
+}
+function intro(){
+  GEN++;
+  show(`<div class="card doc"><h2>辞令</h2><div class="sub">CENTRAL POSTAL AUDIT BUREAU</div>
+   <p>貴官を、ノルヴァーク共和国 中央郵便監査局 <b>第七監査室</b> 監査官に任ずる。</p>
+   <p>隣国エストリアとの国境は封鎖され、国内の郵便はすべて当局の監査を経る。貴官の机には、毎日、他人の手紙が届く。</p>
+   <p>読んで、決めよ。<b>通過</b>させた手紙は宛先に届く。<b>差止</b>とした手紙は焼却され、誰にも届かない。毎朝の<b>通達</b>が、差し止めるべきものを定める。</p>
+   <p>通達に従うか否かは、貴官の机の上では、貴官だけが知っている。</p>
+   <dl><dt>秩序</dt><dd>体制による統制の強さ</dd><dt>民心</dt><dd>人々の暮らしと希望</dd><dt>戦雲</dt><dd>開戦の気配</dd><dt>信用</dt><dd>局内での貴官の立場。尽きれば、席はない</dd></dl>
+   <button class="go">机に着く</button></div>`,()=>dayStart());
+}
+function resume(d){
+  GEN++;resetState();
+  for(const k of ['day','idx','order','people','war','trust','pass','rej'])S[k]=d[k];
+  S.fate=d.fate||{};S.news=d.news||[];S.path=d.path||{};S.dayStart=d.dayStart;Object.assign(F,d.f||{});
+  document.body.classList.add('playing');drawDir();drawMeters();
+  if(d.phase==='day')dayStart();else if(d.phase==='evening')evening();
+  else{hide();$('#dayLabel').textContent=`${DAYN[S.day]}　${DAYS[S.day].date}`;later(showLetter,500)}
+}
+function dayStart(){
+  const D=DAYS[S.day],m=D.morning();
+  document.body.classList.add('playing');$('#slot').innerHTML='';$('#ctrl').classList.add('off');
+  S.dayStart={order:S.order,people:S.people,war:S.war,trust:S.trust};S.news=[];S.idx=0;save('day');
+  drawDir();drawMeters();$('#dayLabel').textContent=`${DAYN[S.day]}　${D.date}`;
+  show(`<div class="card doc"><h2>${DAYN[S.day]}</h2><div class="sub">${D.date}</div>
+   <p class="morning">${m.t}</p>
+   <div class="dirbox" data-h="${S.day<4?'通達 第'+'一二三四'[S.day]+'号':'通達'}">${D.dir}</div>
+   <p style="font-size:12.5px;opacity:.7">本日の郵袋：${D.letters.length} 通${S.day?'　／　これまでの通達も引き続き有効':''}</p>
+   <button class="go">郵袋を開ける</button></div>`,()=>{hide();if(m.fx)apply(m.fx);later(showLetter,450)});
+}
+function evening(){
+  const D=DAYS[S.day],heads=S.news.slice(0,3);save('evening');
+  $('#slot').innerHTML='';$('#ctrl').classList.add('off');
+  for(const f of D.filler){if(heads.length>=3)break;heads.push(f)}
+  const diff=k=>{const d=S[k]-S.dayStart[k];return d?`<em>${d>0?'▲':'▼'}${Math.abs(d)}</em>`:'<em>—</em>'};
+  const fired=S.trust<=0,last=S.day===DAYS.length-1;
+  const memo=fired?'局長室から呼び出しがあった。机の上の判は、すでに片づけられている。'
+    :S.trust<25?'同僚たちは、あなたと目を合わせなくなった。':S.trust>80?'局長は廊下で、あなたの肩を叩いた。「迷いがない。結構だ」':'あなたは判を拭き、灯りを消す。焼却炉の煙が、窓の外を流れていく。';
+  show(`<div class="card np"><div class="mast"><b>ノルヴァーク夕報</b><span><i style="font-style:normal">${D.date}</i><i style="font-style:normal">夕刊</i></span></div>
+   <h3>${heads[0]}</h3><ul>${heads.slice(1).map(h=>`<li>${h}</li>`).join('')}</ul>
+   <div class="score">${METERS.map(([k,l])=>`<div>${l}<b>${S[k]}</b>${diff(k)}</div>`).join('')}</div>
+   <p class="memo">${memo}</p>
+   <button class="go">${fired||last?'結末へ':'翌日へ'}</button></div>`,()=>{
+     if(fired){S.fired=true;ending()}else if(last)ending();else{S.day++;dayStart()}});
+}
+function ending(){
+  $('#slot').innerHTML='';clearSave();document.body.classList.remove('playing');
+  let w,ws,c,cs;
+  if(S.war>=68){w='開戦';ws='十二月の終わり、ノルヴァーク軍は峠を越えた。郵袋は軍事郵便で膨れあがり、そのほとんどは、黒い縁取りの封筒だった。'}
+  else if(S.war<=34){w='雪解け';ws='両軍は峠の稜線から退いた。国境の郵便は再開され、最初の郵袋には、溜まっていた幾月分もの手紙が詰まっていた。'}
+  else{w='にらみ合い';ws='峠では、両軍が雪の中で向かい合ったまま年を越した。誰も撃たなかった。誰も帰れなかった。'}
+  if(S.order>=66&&S.people<=42){c='沈黙の冬';cs='街は静かになった。列に並ぶ人々は、もう互いに話をしない。隣人が何を書くか、誰にも分からないからだ。'}
+  else if(S.order<=36&&S.people>=55){c='空の買い物かご';cs='広場に集まる人々は、日ごとに増えた。年が明ける前に内務大臣が辞任し、倉庫の扉が開いた。'}
+  else if(S.order<=36){c='割れた窓';cs='配給所の窓が割られ、夜ごとに火の手が上がった。怒りには宛先がなく、だからどこにでも届いた。'}
+  else if(S.people>=60){c='小さな春';cs='パンは相変わらず足りない。けれど届くはずのなかった手紙が届き、人々は少しだけ、隣人の顔を見るようになった。'}
+  else{c='変わらぬ朝';cs='配給所の列は、今朝も夜明け前から伸びている。何も変わらなかった。少なくとも、新聞に載るようなことは。'}
+  let you;
+  if(S.fired)you=`着任から${S.day+1}日目の夕方、あなたは局長室に呼ばれた。翌朝、第七監査室の机には別の監査官が座っていた。あなたが通した手紙は、もう誰にも止められない。`;
+  else if(F.whistle)you='手記は国境を越え、三つの言語で印刷された。あなたは夜行列車の三等席で、生まれて初めて、自分宛ての手紙を待つ身になった。';
+  else if(F.promoted)you='手記は灰皿の中で燃えた。春、あなたは電信監査部の長になった。机は広くなり、手紙の代わりに、国じゅうの電信が流れてくる。';
+  else if(S.trust<40)you='手記は燃やした。だが局長は、あなたの通過記録をめくりはじめている。いつまで席があるかは、分からない。';
+  else you='手記は灰皿の中で燃えた。あなたは明日も第七監査室の机に着き、判を拭き、郵袋を開ける。';
+  const yk=S.fired?'罷免':F.whistle?'告発者':F.promoted?'電信監査部長':S.trust<40?'薄氷の席':'変わらぬ机';
+  PROG.ends.w[w]=1;PROG.ends.c[c]=1;PROG.ends.y[yk]=1;PROG.cleared=(PROG.cleared||0)+1;saveProg();
+  const names={family:'エルザとヨナス',teacher:'教師ベルク',milo:'記者ミロ',doctor:'ヴァイス医師',lovers:'ユリウスとハンナ',envoy:'特使ドーレ'};
+  const fates=Object.keys(names).filter(k=>S.fate[k]).map(k=>`<dt>${names[k]}</dt><dd>${S.fate[k]}</dd>`).join('');
+  const tot=S.pass+S.rej,r=tot?S.pass/tot:0;
+  const rank=r>=.75?'開け放たれた窓':r>=.5?'目の粗い篩':r>=.25?'几帳面な篩':'閉ざされた扉';
+  show(`<div class="card end"><div class="k">AND SO —</div><h2>${w}</h2><p>${ws}</p>
+   <h3>${c}</h3><p>${cs}</p><div class="rule"></div>
+   <h3>手紙の行方</h3><dl class="fate">${fates}</dl><div class="rule"></div>
+   <h3>あなた</h3><p>${you}</p>
+   <div class="rank">通過 ${S.pass} 通　／　差止 ${S.rej} 通<b>「${rank}」</b></div>
+   <div class="tmenu"><button class="go" data-a="again">もう一度、着任する</button><button class="sub2" data-a="title">タイトルへ</button></div></div>`,
+   {again:()=>{GEN++;resetState();drawMeters();dayStart()},title:()=>{resetState();drawMeters();title()}});
+}
+
+/* ================= ledger (flow chart) ================= */
+const ARCS=[['family','エルザとヨナス'],['teacher','教師ベルク'],['milo','記者ミロ'],['doctor','ヴァイス医師と鉱山町'],['lovers','ユリウスとハンナ'],['envoy','特使ドーレと外務次官'],['war','峠と将軍'],['you','あなた']];
+const NODES=[
+ ['d1a','family',0,'母から息子へ',''],['d3a1','family',2,'今夜、歩いて帰る','「母から息子へ」を通過'],['d3a2','family',2,'生きていますか','「母から息子へ」を差止'],
+ ['d5a1','family',4,'迷い猫の手紙','「今夜、歩いて帰る」を通過'],['d5a2','family',4,'軍からの公報','ヨナスが峠に上がる ＋「命令書」を通過'],
+ ['d5a3','family',4,'休暇の知らせ','「今夜、歩いて帰る」を差止 ＋「命令書」を差止'],['d5a4','family',4,'母の返事','「生きていますか」を通過 ＋「命令書」を差止'],
+ ['d5a5','family',4,'隣人からの知らせ','「生きていますか」を差止 ＋「命令書」を差止'],
+ ['d1b','teacher',0,'匿名の密告状',''],['d3b1','teacher',2,'零下二度の教室','「匿名の密告状」を差止'],['d3b2','teacher',2,'妻から赤十字へ','「匿名の密告状」を通過'],
+ ['d1c','milo',0,'記者の原稿',''],['d2d1','milo',1,'内務省の照会','「記者の原稿」を通過'],['d2d2','milo',1,'妹への頼み','「記者の原稿」を差止'],
+ ['d4c1','milo',3,'拘置所からの続報','「記者の原稿」を通過'],['d4c2','milo',3,'地下紙のビラ','「妹への頼み」を通過'],['d4c3','milo',3,'出頭の申し出','「妹への頼み」を差止'],
+ ['d2a','doctor',1,'血清の依頼',''],['d3d1','doctor',2,'トビアスの絵手紙','「血清の依頼」を通過'],['d3d2','doctor',2,'十一名の名簿','「血清の依頼」を差止'],
+ ['d2b','lovers',1,'ユリウスの恋文',''],['d4a1','lovers',3,'川向こうからの返事','「ユリウスの恋文」を通過'],['d4a2','lovers',3,'ユリウスの母上へ','「ユリウスの恋文」を差止'],
+ ['d2c','envoy',1,'特使の私信',''],['d4b1','envoy',3,'次官の返信','「特使の私信」を通過'],['d4b2','envoy',3,'最後の手紙','「特使の私信」を差止'],
+ ['d3c','war',2,'封蝋の割れた命令書',''],['d5b1','war',4,'湖畔の覚書','会談が実現 ＋「命令書」を差止'],['d5b2','war',4,'特使の通告','会談が実現 ＋「命令書」を通過'],
+ ['d5b3','war',4,'総動員令','会談が実現せず ＋「命令書」を通過'],['d5b4','war',4,'将軍の上申','会談が実現せず ＋「命令書」を差止'],
+ ['d4d1','you',3,'昇進の推薦状','四日目まで信用を高く保つ'],['d4d2','you',3,'同僚の告発状','四日目の信用が高くない'],['d5c','you',4,'最後の一通','']];
+const ENDS=[['w','国境の結末',['開戦','にらみ合い','雪解け']],['c','街の結末',['沈黙の冬','変わらぬ朝','小さな春','空の買い物かご','割れた窓']],['y','あなたの結末',['罷免','変わらぬ机','薄氷の席','電信監査部長','告発者']]];
+const chartEl=$('#chart');
+function openChart(){
+  const playing=document.body.classList.contains('playing'),hints=!!PROG.hints;
+  const card=n=>{const [id,,,ti,cond]=n,sn=PROG.seen[id],run=playing&&S.path[id],here=playing&&S.cur&&S.cur.id===id&&!run&&!$('#screen').classList.contains('on');
+    if(!sn)return `<div class="nd un"><b>？？？</b>${hints&&cond?`<em>${cond}</em>`:''}</div>`;
+    return `<div class="nd${run?' run':''}${here?' here':''}"><b>${ti}</b>${cond?`<em>${cond}</em>`:''}<span class="mk"><i class="p${sn.p?' on':''}${run==='pass'?' now':''}">通過</i><i class="r${sn.r?' on':''}${run==='rej'?' now':''}">差止</i></span></div>`};
+  let h=`<div class="cwrap"><header><h3>記録簿</h3><div class="en">LEDGER OF LETTERS</div>
+   <p class="cnote">これまでの着任で机に届いた手紙の記録。<br>${playing?'金の枠は今回の道筋、光っている札が現在地。':'まだ届いたことのない手紙は「？？？」のまま。'}塗られた印は今回の判、色のついた印は過去に捺したことのある判。</p>
+   <div class="ctools"><button class="hud-btn" data-c="hint">手がかり：${hints?'表示中':'非表示'}</button><button class="hud-btn" data-c="close">閉じる</button></div></header>`;
+  for(const [k,name] of ARCS){const ns=NODES.filter(n=>n[1]===k),days=[...new Set(ns.map(n=>n[2]))];
+    h+=`<section class="arc"><h4>${name}</h4><div class="row">`+days.map(d=>`<div class="slot"><span class="dlab">${DAYN[d]}</span>${ns.filter(n=>n[2]===d).map(card).join('')}</div>`).join('<i class="arr"></i>')+`</div></section>`}
+  h+=`<section class="arc"><h4>結末</h4>`+ENDS.map(([k,l,list])=>`<h5>${l}</h5><div class="ends">${list.map(e=>PROG.ends[k][e]?`<span>${e}</span>`:'<span class="un">？？？</span>').join('')}</div>`).join('')+`</section></div>`;
+  chartEl.innerHTML=h;chartEl.classList.add('on');
+  const cur=chartEl.querySelector('.here');if(cur)cur.scrollIntoView({block:'center',inline:'center'});else chartEl.scrollTop=0;
+}
+chartEl.onclick=e=>{const b=e.target.closest('[data-c]');if(!b)return;
+  if(b.dataset.c==='close')chartEl.classList.remove('on');else{PROG.hints=!PROG.hints;saveProg();const y=chartEl.scrollTop;openChart();chartEl.scrollTop=y}};
+
+/* ================= pause menu ================= */
+const menu=$('#menu');let armed=false;
+const menuOpen=()=>menu.classList.contains('on');
+function openMenu(){
+  armed=false;
+  menu.innerHTML=`<div class="panel"><h3>休止</h3><div class="en">PAUSED</div>
+   <button class="pri" data-m="resume">机に戻る</button>
+   <button class="only-narrow" data-m="dir">通達を確認する</button>
+   ${PROG.cleared?'<button data-m="led">記録簿を見る</button>':''}
+   <button data-m="snd">音　${sndOn?'ON':'OFF'}</button>
+   <button data-m="quit">中断してタイトルへ</button>
+   <button class="warn" data-m="restart">最初からやり直す</button>
+   <small>進行は手紙ごとに自動で記録されます。<br>タイトルの「つづきから」で再開できます。</small></div>`;
+  menu.classList.add('on');
+}
+const closeMenu=()=>menu.classList.remove('on');
+menu.onclick=e=>{
+  const b=e.target.closest('[data-m]');if(!b){if(e.target===menu)closeMenu();return}
+  const m=b.dataset.m;audio();
+  if(m==='resume')closeMenu();
+  else if(m==='dir'){closeMenu();$('#dir').classList.add('open')}
+  else if(m==='led'){closeMenu();openChart()}
+  else if(m==='snd'){sndOn=!sndOn;b.textContent='音　'+(sndOn?'ON':'OFF');if(sndOn)audio()}
+  else if(m==='quit'){closeMenu();FIRE.i=0;R.setProperty('--fire',0);title()}
+  else if(m==='restart'){
+    if(!armed){armed=true;b.textContent='もう一度押すと、記録を消してやり直す';return}
+    closeMenu();GEN++;FIRE.i=0;R.setProperty('--fire',0);resetState();clearSave();drawMeters();dayStart()}
+};
+$('#btnMenu').onclick=openMenu;
+
+/* ================= desk renderer (WebGL: baked height map + dynamic lights) ================= */
+const GLX=(function(){
+  const c=$('#wood');let gl;
+  try{gl=c.getContext('webgl',{antialias:false,alpha:false,powerPreference:'low-power'})}catch(e){}
+  const fail=()=>{$('#desk').classList.add('nogl');c.style.display='none';return null};
+  if(!gl)return fail();
+  const VS='attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}';
+  const NOISE=`precision highp float;
+  float hash(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
+  float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
+    return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x),mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),f.x),f.y);}
+  float fbm(vec2 p){float a=.5,s=0.;for(int i=0;i<5;i++){s+=a*noise(p);p=p*2.03+17.1;a*=.5;}return s;}`;
+  const BAKE=NOISE+`uniform float uS;
+  void main(){
+    vec2 p=gl_FragCoord.xy/uS;
+    float PH=310.;float row=floor(p.y/PH),fy=fract(p.y/PH);
+    float px=p.x+hash(vec2(row,3.7))*2400.;
+    float PL=2100.;float col=floor(px/PL),fx=fract(px/PL);
+    float id=hash(vec2(row*7.3+1.,col*3.1+2.));
+    vec2 q=vec2(px*.0017,(p.y+id*700.)*.012);
+    float warp=fbm(q+id*30.);
+    float knot=smoothstep(.62,.0,length((vec2(fx*PL,fy*PH)-vec2(PL*(.2+.6*hash(vec2(id,1.))),PH*(.3+.4*hash(vec2(id,2.)))))*vec2(.012,.03)))*step(.8,id);
+    float rings=sin(p.y*.095+warp*27.+id*40.+knot*9.);
+    float ringv=smoothstep(-.85,.9,rings);
+    float fine=noise(vec2(px*.03,p.y*1.7));
+    float pores=smoothstep(.6,.95,noise(vec2(px*.011,p.y*.85+id*9.)))*smoothstep(.35,.9,noise(vec2(px*.22,p.y*.6)));
+    float scr=smoothstep(.985,1.,noise(vec2((p.x+p.y*.35)*.9,(p.y-p.x*.35)*.006)))*smoothstep(.55,.8,noise(p*.0035+9.));
+    float edge=min(min(fy,1.-fy)*PH,min(fx,1.-fx)*PL);
+    float groove=1.-smoothstep(0.,1.7,edge);
+    float bevel=1.-smoothstep(0.,7.,edge);
+    float h=.56+ringv*.10+fine*.045-pores*.09-scr*.16-bevel*.06-groove*.34+fbm(p*.0045)*.12;
+    h=clamp(h,0.,.999);
+    float tint=clamp(.3+.45*id+.3*fbm(vec2(px*.0018,p.y*.004))-knot*.25,0.,1.);
+    float cv=clamp(ringv*.72+fine*.2+(1.-pores)*.08-groove*.9-scr*.25,0.,1.);
+    float hh=h*255.;gl_FragColor=vec4(floor(hh)/255.,fract(hh),tint,cv);
+  }`;
+  const LIT=NOISE+`uniform sampler2D uT;uniform vec2 uR;uniform float uS,uTime,uRad,uFI,uLI;uniform vec3 uLamp,uFire;
+  float H(vec2 uv){vec4 t=texture2D(uT,uv);return t.r+t.g/255.;}
+  vec3 lightAt(vec3 P,vec3 n,vec3 alb,float gv,vec3 lp,vec3 lc,float rad,float sp){
+    vec3 L=lp-P;float d=length(L);L/=d;float att=1./(1.+d*d/(rad*rad));att*=att*1.0+.16;
+    float diff=max(dot(n,L),0.);vec3 Hv=normalize(L+vec3(0.,0.,1.));float nh=max(dot(n,Hv),0.);
+    float spec=pow(nh,110.)*.7+pow(nh,26.)*.22;
+    return (alb*diff*2.0+spec*sp*(.25+gv*.75))*lc*att;}
+  void main(){
+    vec2 uv=gl_FragCoord.xy/uR,px=1./uR;vec4 t=texture2D(uT,uv);
+    float h=H(uv);
+    float k=5.*uS;
+    vec3 n=normalize(vec3((H(uv-vec2(px.x,0.))-H(uv+vec2(px.x,0.)))*k,(H(uv-vec2(0.,px.y))-H(uv+vec2(0.,px.y)))*k,1.));
+    vec3 alb=mix(vec3(.075,.026,.012),vec3(.30,.125,.05),t.a)*(.62+.7*t.b);
+    vec3 P=vec3(gl_FragCoord.xy/uS,0.);
+    vec3 col=alb*vec3(.035,.035,.045);
+    col+=lightAt(P,n,alb,t.a,uLamp,vec3(1.,.66,.34)*uLI*1.25,uRad,1.);
+    if(uFI>.001)col+=lightAt(P,n,alb,t.a,uFire,vec3(1.,.42,.10)*uFI*1.5,uRad*.75,.5);
+    col*=.55+.45*smoothstep(.2,.6,h);
+    col=col/(1.+col*.55);col=pow(col,vec3(.4545));
+    col+=(hash(gl_FragCoord.xy+fract(uTime)*91.)-.5)/200.;
+    gl_FragColor=vec4(col,1.);
+  }`;
+  function mk(fs){const p=gl.createProgram();for(const [ty,src] of [[gl.VERTEX_SHADER,VS],[gl.FRAGMENT_SHADER,fs]]){
+      const s=gl.createShader(ty);gl.shaderSource(s,src);gl.compileShader(s);
+      if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));gl.attachShader(p,s)}
+    gl.bindAttribLocation(p,0,'a');gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw new Error('link');return p}
+  let pB,pL;try{pB=mk(BAKE);pL=mk(LIT)}catch(e){console.warn(e);return fail()}
+  const U=(p,n)=>gl.getUniformLocation(p,n);
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
+  const tex=gl.createTexture(),fbo=gl.createFramebuffer();let W=0,H=0,sc=1;
+  function resize(){
+    sc=Math.min(devicePixelRatio||1,1.5);const mp=innerWidth*innerHeight*sc*sc;if(mp>2.2e6)sc*=Math.sqrt(2.2e6/mp);
+    W=c.width=Math.max(2,Math.round(innerWidth*sc));H=c.height=Math.max(2,Math.round(innerHeight*sc));
+    gl.bindTexture(gl.TEXTURE_2D,tex);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,W,H,0,gl.RGBA,gl.UNSIGNED_BYTE,null);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+    gl.bindFramebuffer(gl.FRAMEBUFFER,fbo);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,tex,0);
+    gl.viewport(0,0,W,H);gl.useProgram(pB);gl.uniform1f(U(pB,'uS'),sc);gl.drawArrays(gl.TRIANGLES,0,3);
+    gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+  }
+  const u={};for(const n of ['uT','uR','uS','uTime','uRad','uFI','uLI','uLamp','uFire'])u[n]=U(pL,n);
+  function draw(t){
+    gl.viewport(0,0,W,H);gl.useProgram(pL);gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.uniform1i(u.uT,0);gl.uniform2f(u.uR,W,H);gl.uniform1f(u.uS,sc);gl.uniform1f(u.uTime,t/1000);
+    gl.uniform1f(u.uRad,Math.max(innerWidth,innerHeight)*.46);gl.uniform1f(u.uFI,FIRE.i);gl.uniform1f(u.uLI,LAMP.i);
+    gl.uniform3f(u.uLamp,LAMP.x,innerHeight-LAMP.y,LAMP.z);gl.uniform3f(u.uFire,FIRE.x,innerHeight-FIRE.y,150);
+    gl.drawArrays(gl.TRIANGLES,0,3);
+  }
+  c.addEventListener('webglcontextlost',e=>e.preventDefault());c.addEventListener('webglcontextrestored',()=>location.reload());
+  return{resize,draw};
+})();
+
+/* ================= light layout, dust, flames ================= */
+const dustC=$('#dust'),dx_=dustC.getContext('2d'),fxC=$('#fx'),fx_=fxC.getContext('2d');let VW,VH,dust=[];
+function layout(){
+  VW=innerWidth;VH=innerHeight;dustC.width=fxC.width=VW;dustC.height=fxC.height=VH;
+  LAMP.bx=LAMP.x=VW<641?VW*.86:VW*.5+Math.min(VW*.3,430);LAMP.by=LAMP.y=VW<641?-14:-24;LAMP.z=VW<641?190:170;
+  R.setProperty('--lx',LAMP.x+'px');R.setProperty('--ly',LAMP.y+'px');
+  const ddx=VW/2-LAMP.x,ddy=VH/2-LAMP.y,l=Math.hypot(ddx,ddy)||1;
+  R.setProperty('--shx',(ddx/l*15).toFixed(1)+'px');R.setProperty('--shy',(ddy/l*20+4).toFixed(1)+'px');
+  dust=Array.from({length:Math.round(Math.min(46,VW*VH/26000))},()=>({x:Math.random()*VW,y:Math.random()*VH,r:Math.random()*1.3+.3,vx:(Math.random()-.5)*.12,vy:-Math.random()*.1-.02,p:Math.random()*6.28}));
+  if(GLX)GLX.resize();
+}
+let rsT;addEventListener('resize',()=>{clearTimeout(rsT);rsT=setTimeout(layout,120)});
+layout();
+const sparkImg=(()=>{const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d'),g=x.createRadialGradient(32,32,0,32,32,32);
+  g.addColorStop(0,'rgba(255,225,150,1)');g.addColorStop(.12,'rgba(255,160,50,.7)');g.addColorStop(.4,'rgba(255,90,10,.2)');g.addColorStop(1,'rgba(255,60,0,0)');
+  x.fillStyle=g;x.fillRect(0,0,64,64);return c})();
+let lastT=0,fxDirty=false;const glowEl=$('#glow');
+(function loop(t){
+  requestAnimationFrame(loop);if(document.hidden)return;const dt=Math.min(.05,(t-lastT)/1000);lastT=t;
+  {const s=t/1000;let v=1+.06*Math.sin(s*8.3)+.045*Math.sin(s*13.9+1.3)+.035*Math.sin(s*22.7+.7);
+   const g=Math.sin(s*.83)*Math.sin(s*1.61+2.);if(g>.72)v-=(g-.72)*1.5*(.5+.5*Math.sin(s*29.));
+   LAMP.i=v;LAMP.x=LAMP.bx+Math.sin(s*2.3)*7+Math.sin(s*7.1)*3;LAMP.y=LAMP.by+Math.cos(s*3.1)*5;glowEl.style.opacity=(.55+.45*v).toFixed(3)}
+  if(GLX)GLX.draw(t);
+  dx_.clearRect(0,0,VW,VH);const R2=Math.max(VW,VH)*.6;
+  for(const p of dust){p.x+=p.vx+Math.sin(t/2600+p.p)*.08;p.y+=p.vy;if(p.y<-5){p.y=VH+5;p.x=Math.random()*VW}
+    const d=Math.hypot(p.x-LAMP.x,p.y-LAMP.y)/R2,a=Math.max(0,1-d*d)*(.35+.25*Math.sin(t/900+p.p));
+    if(a<=.01)continue;dx_.fillStyle=`rgba(255,220,160,${a.toFixed(3)})`;dx_.beginPath();dx_.arc(p.x,p.y,p.r,0,6.28);dx_.fill()}
+  if(flames.length||fxDirty){
+    fx_.clearRect(0,0,VW,VH);fxDirty=flames.length>0;fx_.globalCompositeOperation='lighter';
+    fx_.lineCap='round';
+    for(let i=flames.length-1;i>=0;i--){const f=flames[i];f.l+=dt;if(f.l>=f.m){flames.splice(i,1);continue}
+      const k=f.l/f.m;f.vx+=Math.sin(t/170+f.w)*90*dt;f.vy-=18*dt;f.x+=f.vx*dt;f.y+=f.vy*dt;
+      const a=(1-k)*(1-k)*(.75+.25*Math.sin(t/38+f.w*7)),g=f.s*(16+12*(1-k));
+      fx_.globalAlpha=Math.min(1,a*1.25);fx_.drawImage(sparkImg,f.x-g,f.y-g,g*2,g*2);fx_.globalAlpha=Math.min(1,a*1.5);fx_.drawImage(sparkImg,f.x-g*.45,f.y-g*.45,g*.9,g*.9);
+      fx_.globalAlpha=1;fx_.strokeStyle=`rgba(255,${(250-120*k)|0},${(215-185*k)|0},${Math.min(1,a*1.6).toFixed(2)})`;fx_.lineWidth=f.s*(1.25-k*.5);
+      fx_.beginPath();fx_.moveTo(f.x-f.vx*.022,f.y-f.vy*.022);fx_.lineTo(f.x,f.y);fx_.stroke()}
+    fx_.globalAlpha=1;
+    fx_.globalCompositeOperation='source-over';
+  }
+})(0);
+
+drawMeters();drawDir();title();
+</script>
+</body>
+</html>
